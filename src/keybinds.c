@@ -23,7 +23,7 @@ extern int redraw_full_screen;
 char help_pages[NUM_HELP_PAGES][MAX_HELP_PAGE_LEN]; // set at the bottom of this file
 void run_command(char c) {
     switch(c) {
-        case 't': // Set file type
+        case 't': // Update file type based on file name suffix.
             update_settings_from_file_type(get_file_type(&file_name));
             break;
         case 'u': // undo
@@ -64,27 +64,26 @@ void run_command(char c) {
         case 'l': // right
             cursor_x += 1;
             break;
-        //                vi arrow keys 4x
-#define CAPITAL_MOVEMENT_MULTIPLIER 1
+        //                SCROLLING
         case 'K': // up
             if (top_line_of_screen > 0) {
-                cursor_y -= CAPITAL_MOVEMENT_MULTIPLIER;
-                top_line_of_screen -= CAPITAL_MOVEMENT_MULTIPLIER;
+                cursor_y -= 1;
+                top_line_of_screen -= 1;
             }
             break;
         case 'J': // down
-            cursor_y += CAPITAL_MOVEMENT_MULTIPLIER;
-            top_line_of_screen += CAPITAL_MOVEMENT_MULTIPLIER;
+            cursor_y += 1;
+            top_line_of_screen += 1;
             break;
         case 'H': // left
             if (text_display_x_start > 0) {
-                cursor_x -= CAPITAL_MOVEMENT_MULTIPLIER;
-                text_display_x_start -= CAPITAL_MOVEMENT_MULTIPLIER;
+                cursor_x -= 1;
+                text_display_x_start -= 1;
             }
             break;
         case 'L': // right
-            cursor_x += CAPITAL_MOVEMENT_MULTIPLIER;
-            text_display_x_start += CAPITAL_MOVEMENT_MULTIPLIER;
+            cursor_x += 1;
+            text_display_x_start += 1;
             break;
         case '0': // goto start of line
             cursor_x = 0;
@@ -97,6 +96,7 @@ void run_command(char c) {
             break;
         case 'G': // goto bottom of document
             cursor_y = MAX_LINES-1;
+            break;
             while (document[cursor_y].len == 0)
                 cursor_y -= 1;
             break;

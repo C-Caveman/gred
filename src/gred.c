@@ -22,15 +22,12 @@ void switch_mode(int next_mode) {
     mode = next_mode;
     if (mode == ESCAPE_MODE) {
         menu_prompt = escape_mode_help;
-        //printf("\033[2 q"); // set non-blinking cursor
     }
     if (mode == INSERT_MODE) {
         menu_prompt = insert_mode_help;
-        //printf("\033[1 q"); // set blinking cursor
-        //printf("\033[5m");
     }
 }
-
+// For when the user manually switches mode. Allows returning to insert mode after escape sequences.
 void remember_mode(int next_mode) {
     previous_mode = mode;
 }
@@ -92,11 +89,8 @@ char getch() {
 
 // set cursor position in terminal (where cursor is shown, and text from printf goes)
 void move_cursor(int x, int y) {
-    x -= text_display_x_start;
     x = bound_value(x, 0, screen_width); // prevent shennanigans
-    fflush(stdout);
     printf("\033[%d;%dH", y+1, x+1); // move cursor to x,y
-    fflush(stdout);
 }
 
 // print a line of the document
@@ -152,8 +146,8 @@ void clip_cursor_to_grid() {
         redraw_full_screen = 1;
 }
 
-size_t find_num_width(size_t num) {
-    size_t size = 0;
+int find_num_width(int num) {
+    int size = 0;
     while (num > 0) {
         size += 1;
         num /= 10;
@@ -183,9 +177,9 @@ void draw_menu() {
 
 // Redraw the screen (skipping unchanged lines)
 void draw_screen() {
-    // set up the cursor
-    clip_cursor_to_grid(); // the cursor can be safely drawn by display_line()
-    // redraw the screen if screen-wide changes occurred
+    // Keep the cursor inside the document.
+    clip_cursor_to_grid();
+    // Redraw the screen if needed.
     if ((old_show_line_numbers != show_line_numbers) ||
         (old_top_line_of_screen != top_line_of_screen) ||
         (old_text_display_x_start != text_display_x_start)) {
@@ -201,7 +195,7 @@ void draw_screen() {
     int line_number_width = find_num_width(top_line_of_screen+screen_height);
     total_line_number_width = 0;
     if (show_line_numbers)
-        total_line_number_width = line_number_width + 2;
+        total_line_number_width = line_number_width + 2; // The 2 extra chars: ": "
     clip_cursor_to_grid(); // clip the horizontal scrolling as well
     for (int i=top_line_of_screen; i<top_line_of_screen+screen_height; i++) {
         // Skip unedited lines (if not refreshing whole screen)
@@ -209,14 +203,12 @@ void draw_screen() {
             continue;
         // mark line as unchanged again
         document[i].flags &= ~CHANGED;
-        // clear the current line
-        move_cursor(0, i);
-        clear_line(i-top_line_of_screen);
-        if (show_line_numbers == 1) {
+        move_cursor(0, i); // Move cursor to start of current line.
+        clear_line(i-top_line_of_screen); // Clear the current line.
+        if (show_line_numbers == 1)
             printf("%*d: ", line_number_width, i);
-        }
         if (keyword_coloring)
-            print_highlighted(&document[i], text_display_x_start, text_display_x_end);
+            display_line_highlighted(&document[i], text_display_x_start, text_display_x_end);
         else
             display_line(&document[i], text_display_x_start, text_display_x_end);
         // bottom of the screen reached?
@@ -228,23 +220,19 @@ void draw_screen() {
     draw_menu();
     // Put the cursor in correct part of the screen.
     if (in_menu) // If menu_prompt is longer than 32 chars, cut it off.
-        move_cursor(menu_cursor_x+strnlen(menu_prompt, 32), screen_height+menu_height);
+        move_cursor(strnlen(menu_prompt, 32)+menu_cursor_x, screen_height+menu_height);
     else
-        move_cursor(cursor_x+total_line_number_width, cursor_y-top_line_of_screen);
+        move_cursor(cursor_x-text_display_x_start+total_line_number_width, cursor_y-top_line_of_screen);
     // Change the cursor.
     if (mode == ESCAPE_MODE) {
         // Solid block cursor shown when in escape mode.
         if (mode_specific_cursors_enabled)
             printf("\033[2 q");
-        //else
-        //    printf("\033[?25h"); // hides the cursor (probably not a good idea)
     }
     else if (mode == INSERT_MODE) {
         // Vertical bar cursor when in insert mode.
         if (mode_specific_cursors_enabled)
             printf("\033[6 q");
-        //else
-        //    printf("\033[?25l"); // un-hides the cursor
     }
     // Vars that trigger full screen redrawing when changed.
     old_top_line_of_screen = top_line_of_screen;
@@ -252,22 +240,6 @@ void draw_screen() {
     old_text_display_x_start = text_display_x_start;
     // No longer need to refresh the entire screen.
     redraw_full_screen = 0;
-}
-
-// check if the line is within the boundaries of the document
-void validate_line(int column, int row) {
-    // sanity check
-    if (row < 0 || row > MAX_LINES-1) {
-        system("clear");
-        perror("*** Deleting from invalid line!\n");
-        exit(-1);
-    }
-    // more sanity checks
-    if (column < 0 || column > document[row].len+1) {
-        system("clear");
-        perror("*** Deleting from invalid line index!\n");
-        exit(-1);
-    }
 }
 
 int line_backspace(int cursor_x_pos, struct line* l) {
@@ -300,9 +272,9 @@ void line_copy_range(struct line* a, int a_first, int a_last,
     a->len = (copy_ending > a->len) ? copy_ending : a->len;
 }
 
-size_t find_num_empty_lines() {
-    size_t num_empty_lines = 0;
-    for (size_t line_number=MAX_LINES-1; line_number>0; line_number--) {
+int find_num_empty_lines() {
+    int num_empty_lines = 0;
+    for (int line_number=MAX_LINES-1; line_number>0; line_number--) {
         if (document[line_number].len != 0)
             break;
         num_empty_lines++;
@@ -313,7 +285,7 @@ size_t find_num_empty_lines() {
 void merge_line_upwards(int row) {
     if (row <= 0 || (document[row-1].len + document[row].len) > LINE_WIDTH)
         return;
-    size_t last_line_len = document[row-1].len;
+    int last_line_len = document[row-1].len;
     // move the current line up
     record_before_edit(cursor_x, row-1, FIRST_OF_MULTIPLE_EDITS);
     line_copy_range(&document[row-1], document[row-1].len, LINE_WIDTH, 
@@ -335,8 +307,8 @@ void delete_empty_line(int row) {
     //TODO more safety checks TODO
     if (row < 0)
         return;
-    size_t num_empty_lines = find_num_empty_lines();
-    size_t last_line = MAX_LINES - num_empty_lines;
+    int num_empty_lines = find_num_empty_lines();
+    int last_line = MAX_LINES - num_empty_lines;
     // move all lines up
     for (int line_number=row; line_number<last_line-1; line_number++) {
         // move it up
@@ -353,14 +325,14 @@ void delete_empty_line(int row) {
 
 // make room for a new line after the specified row
 void insert_new_empty_line(int row) {
-    size_t num_empty_lines = find_num_empty_lines();
-    if (num_empty_lines <= 0) {
-        system("clear");
-        perror("*** No new lines remaining!\n");
-        exit(-1);
+    int num_empty_lines = find_num_empty_lines();
+    // Make sure there is space for the new line.
+    if (num_empty_lines <= 0 || row >= MAX_LINES-1) {
+        cursor_y -= 1;
+        return;
     }
     // shift lines below row, down one line TODO add safety checks here TODO
-    for (int i=MAX_LINES-num_empty_lines; i>row; i--) {
+    for (int i=MAX_LINES-1-num_empty_lines; i>row; i--) {
         copy_line(&document[i], &document[i-1]);
         document[i].flags |= CHANGED;
     }
@@ -560,11 +532,10 @@ void redo() {
 }
 
 void handle_insert_mode_newline(int column, int row) {
-    size_t num_empty_lines = find_num_empty_lines();
-    if (num_empty_lines <= 0) {
-        system("clear");
-        perror("*** No new lines remaining!\n");
-        exit(-1);
+    int num_empty_lines = find_num_empty_lines();
+    // Only insert if there is space to do so.
+    if (num_empty_lines <= 0 || row >= MAX_LINES-1) {
+        return;
     }
     int extra_line_len = document[row].len - (column);
     // make room for the new line
@@ -642,7 +613,7 @@ void save_file(char* fname) {
 }
 
 void handle_input(char c) {
-    size_t line_len = document[cursor_y].len;
+    int line_len = document[cursor_y].len;
     // handle escape code
     if (in_escape_sequence) {
         run_escape_code(build_escape_sequence(c));
@@ -677,7 +648,6 @@ void handle_input(char c) {
                 cursor_y -= 1;
             }
             else if (line_len > 0) {             // delete the character next to the cursor
-                validate_line(cursor_x, cursor_y);
                 record_before_edit(cursor_x, cursor_y, SINGLE_EDIT);
                 cursor_x = line_backspace(cursor_x, &document[cursor_y]);
                 record_after_edit(cursor_x, cursor_y, EDIT_CHANGE_LINE);

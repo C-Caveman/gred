@@ -57,6 +57,33 @@ extern char escape_mode_help[]; // Menu text when in escape mode.
 extern int keyword_coloring;
 extern int use_tabulators;
 extern int num_tab_spaces;
+// The full state of the text editor.
+/*
+struct editor {
+    // Cursor state:
+    int cursor_x, cursor_y, menu_cursor_x;
+    
+    // Display state:
+    int top_line_of_screen; // index of the top line displayed on the screen
+    int text_display_x_start; // index of leftmost char displayed.
+    int text_display_x_start; // index of first column displayed on the screen
+    int screen_height; // number of document lines that are displayed at once
+    
+    // Mode:
+    int mode; // ESCAPE_MODE or INSERT_MODE?
+    int in_menu; // In a menu?
+    int in_escape_sequence; // whether of not an escape sequence is being processed
+    struct line cur_escape_sequence; // current escape code (omitting the initial "<escape>[")
+    int quit; // Exiting the editor or not.
+    int debug; // Showing input debug info or not.
+    
+    // Settings:
+    int keyword_coloring;
+    int use_tabulators;
+    int num_tab_spaces;
+};
+extern editor e; // The editor state.
+*/
 // Information used to undo/redo changes to a document.
 struct edit {
     // what operation was performed
@@ -106,7 +133,7 @@ enum modes { // for escape codes
 void draw_screen();
 // keep the cursor from leaving the document
 void clip_cursor_to_grid();
-void print_highlighted(struct line* l, int left_index, int right_index);
+void display_line_highlighted(struct line* l, int left_index, int right_index);
 
 //
 // Document editing functions:
@@ -161,7 +188,7 @@ void debug_input(char c);
 void print_debug_input(char c);
 void print_debug_mode(int state);
 void test_highlighting();
-
+void doi(); // Print "DOI!!!" and quit.
 // misc utilites
 int bound_value(int v, int min, int max); // clips value to [min, max]
 

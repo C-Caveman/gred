@@ -9,6 +9,12 @@ char mode_names[NUM_MODES][MAX_MODE_NAME_LEN] = {
     "ESCAPE_MODE",
 };
 
+void doi() {
+    system("clear");
+    printf("DOI!!!\n");
+    exit(0);
+}
+
 void debug_input(char c) {
     //
     print_debug_mode(previous_mode);

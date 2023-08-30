@@ -99,7 +99,7 @@ int in_list(struct line* word, char list[][MAX_KEYWORD_LEN]) {
 }
 
 // print a line, highlighting key words
-void print_highlighted(struct line* l, int start_index, int stop_index) {
+void display_line_highlighted(struct line* l, int start_index, int stop_index) {
     struct line word = {0, 0, ""};
     int len = l->len;
     stop_index = bound_value(len, 0, stop_index);
@@ -166,7 +166,7 @@ void print_highlighted(struct line* l, int start_index, int stop_index) {
 void test_highlighting() {
     struct line l = {0,0, "char insert_mode_help[] =  {0, 0, 0}"};
     l.len = strlen(l.text);
-    print_highlighted(&l, 0, l.len);
+    display_line_highlighted(&l, 0, l.len);
     printf("\n");
 }
 
