@@ -310,14 +310,12 @@ void delete_empty_line(int row) {
     int num_empty_lines = find_num_empty_lines();
     int last_line = MAX_LINES - num_empty_lines;
     // move all lines up
-    for (int line_number=row; line_number<last_line-1; line_number++) {
+    for (int i=row; i<last_line-1; i++) {
         // move it up
-        document[line_number].len = document[line_number+1].len;
-        for (int i=0; i<document[line_number+1].len; i++) {
-            // current_line <- next_line
-            document[line_number].text[i] = document[line_number+1].text[i];
-            document[i].flags |= CHANGED;
-        }
+        document[i].len = document[i+1].len;
+        copy_line(&document[i], &document[i+1]);
+        document[i].flags |= CHANGED;
+        document[i+1].flags |= CHANGED;
     }
     if (row < last_line)
         document[last_line-1].len = 0;
@@ -332,7 +330,7 @@ void insert_new_empty_line(int row) {
         return;
     }
     // shift lines below row, down one line TODO add safety checks here TODO
-    for (int i=MAX_LINES-1-num_empty_lines; i>row; i--) {
+    for (int i=MAX_LINES-num_empty_lines; i>row; i--) {
         copy_line(&document[i], &document[i-1]);
         document[i].flags |= CHANGED;
     }
