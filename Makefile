@@ -1,3 +1,4 @@
+# See LICENSE file for copyright and license details.
 SOURCES = \
 src/gred.c src/keybinds.c \
 src/debug_stuff.c src/keyword_coloring.c \

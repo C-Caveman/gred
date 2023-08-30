@@ -1,3 +1,4 @@
+//See LICENSE file for copyright and license details.
 // Help info for using gred, the Grid-based text Editor
 #include "gred.h"
 

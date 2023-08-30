@@ -1,3 +1,4 @@
+//See LICENSE file for copyright and license details.
 // Functions for color-coding keywords.
 #include "gred.h"
 

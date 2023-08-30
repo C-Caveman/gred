@@ -1,3 +1,4 @@
+//See LICENSE file for copyright and license details.
 // Menus such as the save_file() menu.
 #include "gred.h" 
 
