@@ -2,7 +2,7 @@
 SOURCES = \
 src/gred.c src/keybinds.c \
 src/debug_stuff.c src/keyword_coloring.c \
-src/menus.c
+src/menus.c src/file_types.c
 
 gred: ${SOURCES} src/gred.h Makefile
 	gcc ${SOURCES} -o gred

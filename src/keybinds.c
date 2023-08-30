@@ -21,9 +21,11 @@ extern int redraw_full_screen;
 #define NUM_HELP_PAGES 4
 #define MAX_HELP_PAGE_LEN 2048
 char help_pages[NUM_HELP_PAGES][MAX_HELP_PAGE_LEN]; // set at the bottom of this file
-
 void run_command(char c) {
     switch(c) {
+        case 't': // Set file type
+            update_settings_from_file_type(get_file_type(&file_name));
+            break;
         case 'u': // undo
             undo();
             break;

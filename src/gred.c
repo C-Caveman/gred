@@ -40,6 +40,8 @@ int show_line_numbers = 1;
 int old_show_line_numbers = 1;
 int keyword_coloring = 1;
 int mode_specific_cursors_enabled = 0; // If switching modes can change the cursor's appearance.
+int use_tabulators = 0;
+int num_tab_spaces = 4;
 
 // Text input to the menu.
 struct line menu_input;
@@ -692,9 +694,20 @@ void handle_input(char c) {
             if (c == '\n') {
                 handle_insert_mode_newline(cursor_x, cursor_y);
             }
-            else if (isprint(c) || c == '\t') { // only insert printable characters!
+            else if (isprint(c) && c != '\t') { // only insert printable characters!
                 record_before_edit(cursor_x, cursor_y, SINGLE_EDIT);
                 cursor_x = line_insert(c, cursor_x, &document[cursor_y]);
+                record_after_edit(cursor_x, cursor_y, EDIT_CHANGE_LINE);
+            }
+            else if (c == '\t') {
+                record_before_edit(cursor_x, cursor_y, SINGLE_EDIT);
+                if (!use_tabulators) {
+                    for (int i=0; i<num_tab_spaces; i++)
+                        cursor_x = line_insert(' ', cursor_x, &document[cursor_y]);
+                }
+                else {
+                    cursor_x = line_insert('\t', cursor_x, &document[cursor_y]);
+                }         
                 record_after_edit(cursor_x, cursor_y, EDIT_CHANGE_LINE);
             }
         }
@@ -739,6 +752,7 @@ int main(int argc, char* argv[]) {
         strncpy(file_name.text, argv[1], LINE_WIDTH-1);
         file_name.len = strnlen(file_name.text, LINE_WIDTH-1);
     }
+    update_settings_from_file_type(get_file_type(&file_name));
     cursor_y = 0;
     cursor_x = 0;
     char c = '?';

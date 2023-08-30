@@ -55,7 +55,8 @@ extern char insert_mode_help[]; // Menu text when in insert mode.
 extern char escape_mode_help[]; // Menu text when in escape mode.
 // Editor settings:
 extern int keyword_coloring;
-
+extern int use_tabulators;
+extern int num_tab_spaces;
 // Information used to undo/redo changes to a document.
 struct edit {
     // what operation was performed
@@ -134,6 +135,10 @@ void run_escape_code(int escape_code_index);
 void menu_save_file();
 // search for word
 void menu_search();
+// Set the file type of the document (.txt, .c, Makefile, ect.)
+int get_file_type(struct line* fname);
+// Update settings such as use_tabulators for a given file type
+void update_settings_from_file_type(int file_type);
 
 //
 // Escape code processing:
