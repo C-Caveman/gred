@@ -36,6 +36,16 @@ void run_command(char c) {
             switch_mode(INSERT_MODE);
             remember_mode(INSERT_MODE); // user explicitly chose this mode
             break;
+        case 'I': // insert mode, goto start of line
+            switch_mode(INSERT_MODE);
+            remember_mode(INSERT_MODE);
+            cursor_x = 0;
+            break;
+        case 'a': // insert mode, goto end of line
+            switch_mode(INSERT_MODE);                                                                                                            
+            remember_mode(INSERT_MODE);
+            cursor_x = document[cursor_y].len + 1;
+            break;
         case 'q': // quit
             quit = 1;
             break;
@@ -50,6 +60,17 @@ void run_command(char c) {
             break;
         case CTRL_S: // save file
             menu_save_file();
+            break;
+        case 'o': // insert new line below
+            cursor_y += 1;
+            record_before_edit(cursor_x, cursor_y, SINGLE_EDIT);
+            insert_new_empty_line(cursor_y);
+            record_after_edit(cursor_x, cursor_y, EDIT_INSERT_LINE);
+            break;
+        case 'O': // insert new line above
+            record_before_edit(cursor_x, cursor_y, SINGLE_EDIT);
+            insert_new_empty_line(cursor_y);
+            record_after_edit(cursor_x, cursor_y-1, EDIT_INSERT_LINE);
             break;
         //                vi arrow keys
         case 'k': // up
@@ -96,7 +117,6 @@ void run_command(char c) {
             break;
         case 'G': // goto bottom of document
             cursor_y = MAX_LINES-1;
-            break;
             while (document[cursor_y].len == 0)
                 cursor_y -= 1;
             break;

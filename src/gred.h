@@ -14,7 +14,7 @@
 #define MAX_LINES 4096
 
 enum line_flags { // properties a line can have
-    CHANGED=0b1,
+    CHANGED= 0b1,
     WRAPPED=0b10,
 };
 // Lines of text that make up a document.
@@ -82,7 +82,7 @@ struct editor {
     int use_tabulators;
     int num_tab_spaces;
 };
-extern editor e; // The editor state.
+extern editor ed; // The editor state.
 */
 // Information used to undo/redo changes to a document.
 struct edit {
@@ -148,6 +148,8 @@ void delete_empty_line(int row);
 int line_insert(char c, int cursor_x_pos, struct line* l);
 // move the current line into the previous line
 void merge_line_upwards(int row);
+// Insert a new empty line at the given row.
+void insert_new_empty_line(int row);
 
 //
 // User input functions:
