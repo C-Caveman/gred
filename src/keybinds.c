@@ -14,7 +14,7 @@ extern struct line cur_escape_sequence;
 extern int show_line_numbers;
 extern int quit;
 extern int debug;
-extern int keyword_coloring;
+extern int colorize;
 extern int redraw_full_screen;
 
 // help page stuff
@@ -229,7 +229,7 @@ void run_escape_code(int escape_code_index) {
             menu_alert = secret_message;
             break;
         case COLORS:
-            keyword_coloring = !keyword_coloring;
+            colorize = !colorize;
             redraw_full_screen = 1;
             break;
         default:

@@ -25,26 +25,31 @@ struct line {
     // If you add another member, you must update the copy_line() function in gred.c!
 };
 
-// The document.
+// Document being edited:
 extern struct line document[MAX_LINES];
 
-//
-// State of the editor:
-//
+// Editor mode:
+extern int mode; // INSERT_MODE or ESCAPE_MODE
+extern int previous_mode; // last mode used (used to revert the mode after an escape sequence)
+
+// State of the cursor:
 extern int cursor_x; // where we are in the document
 extern int cursor_y;
-extern int mode; // Whether in ESCAPE_MODE or INSERT_MODE (running commands or inserting text)
+
+// Screen data:
 extern struct line file_name; // Name of current file.
 extern int top_line_of_screen; // index of the top line displayed on the screen
-extern int text_display_x_start; // index of leftmost char displayed.
-extern int text_display_x_start; // index of first column displayed on the screen
+extern int old_top_line_of_screen; // Previous top line of document displayed.
+extern int text_display_x_start; // index of leftmost char displayed on the screen
+extern int text_display_x_end; // index of rightmost char displayed on the screen
+extern int total_screen_height; // terminal height (# of lines)
 extern int screen_height; // number of document lines that are displayed at once
-extern int in_escape_sequence; // whether of not an escape sequence is being processed
-extern struct line cur_escape_sequence; // current escape code (omitting the initial "<escape>[")
-extern int show_line_numbers; // whether to display line numbers or not
-extern int quit; // if exiting the editor or not
-extern int debug; // if displaying input debug information or not (disables normal text)
-// Menu state:
+extern int screen_width; // number of document characters that fit on screen
+extern int redraw_full_screen; // flag for redrawing the full screen
+extern int total_line_number_width; // full width of the line numbers section, includes padding
+extern int menu_height; // how many lines tall the menu is
+
+// Menu:
 extern int in_menu; // Currently in a menu?
 extern int menu_cursor_x;
 extern struct line menu_input; // Text input to the current menu.
@@ -53,10 +58,21 @@ extern char* menu_alert; // Message that can be set anywhere, disapears next tim
 #define MAX_MENU_PROMPT_WIDTH 16
 extern char insert_mode_help[]; // Menu text when in insert mode.
 extern char escape_mode_help[]; // Menu text when in escape mode.
+
 // Editor settings:
-extern int keyword_coloring;
+extern int show_line_numbers; // whether to display line numbers or not
+extern int colorize; // change color of keywords such as "int" and "return"
 extern int use_tabulators;
 extern int num_tab_spaces;
+extern int mode_specific_cursors_enabled; // whether the terminal supports bar/box cursor swapping
+
+// Escape sequences:
+extern int in_escape_sequence; // whether of not an escape sequence is being processed
+extern struct line cur_escape_sequence; // current escape code (omitting the initial "<escape>[")
+
+// Special state flags:
+extern int quit; // if exiting the editor or not
+extern int debug; // if displaying input debug information or not (disables normal text)
 // The full state of the text editor.
 /*
 struct editor {
@@ -78,7 +94,7 @@ struct editor {
     int debug; // Showing input debug info or not.
     
     // Settings:
-    int keyword_coloring;
+    int colorize;
     int use_tabulators;
     int num_tab_spaces;
 };
@@ -134,6 +150,12 @@ void draw_screen();
 // keep the cursor from leaving the document
 void clip_cursor_to_grid();
 void display_line_highlighted(struct line* l, int left_index, int right_index);
+// set cursor position in terminal (where cursor is shown, and text from printf goes)
+void move_cursor(int x, int y);
+// print a line of the document
+void display_line(struct line* l, int start_index, int stop_index);
+// Check if the terminal supports having a vertical bar for the cursor.
+int check_vertical_bar_cursor_supported();
 
 //
 // Document editing functions:
@@ -150,12 +172,19 @@ int line_insert(char c, int cursor_x_pos, struct line* l);
 void merge_line_upwards(int row);
 // Insert a new empty line at the given row.
 void insert_new_empty_line(int row);
+// Get the # of lines after the last non-empty line.
+int find_num_empty_lines();
+// Copy given region of line b into given region of line a
+void line_copy_range(struct line* a, int a_first, int a_last,
+                     struct line* b, int b_first, int b_last);
 
 //
 // User input functions:
 //
 // grab the next character the user types
 char getch();
+// Process a keystroke from the user.
+void handle_input(char c);
 // run a command from escape mode
 void run_command(char c);
 // perform an operation for a given escape code
