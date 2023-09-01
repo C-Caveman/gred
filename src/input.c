@@ -2,6 +2,8 @@
 // Handle input to the text editor.
 #include "gred.h"
 
+int recording_macro = 0;
+
 // Get a character immediately after it is pressed.
 // from: https://stackoverflow.com/questions/421860/capture-characters-from-standard-input-without-waiting-for-enter-to-be-pressed
 char getch() {

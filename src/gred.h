@@ -31,6 +31,7 @@ extern struct line document[MAX_LINES];
 // Editor mode:
 extern int mode; // INSERT_MODE or ESCAPE_MODE
 extern int previous_mode; // last mode used (used to revert the mode after an escape sequence)
+extern int recording_macro;
 
 // State of the cursor:
 extern int cursor_x; // where we are in the document
@@ -121,6 +122,7 @@ enum edit_types { // used by the undo/redo system
     EDIT_CHANGE_LINE,
     EDIT_DELETE_LINE,
     EDIT_INSERT_LINE,
+    EDIT_MOVE_CURSOR,
     NUM_EDIT_TYPES
 };
 enum edit_sequence_types { // for linking multiple edits to be undone/redone at once

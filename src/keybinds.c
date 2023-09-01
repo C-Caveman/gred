@@ -21,6 +21,7 @@ extern int redraw_full_screen;
 #define NUM_HELP_PAGES 4
 #define MAX_HELP_PAGE_LEN 2048
 char help_pages[NUM_HELP_PAGES][MAX_HELP_PAGE_LEN]; // set at the bottom of this file
+char macro_msg[] = "Press <escape> twice to end the macro.";
 void run_command(char c) {
     switch(c) {
         case 't': // Update file type based on file name suffix.
@@ -65,7 +66,7 @@ void run_command(char c) {
             // ugly hack: Cursor movement treated as an edit to preserve cursor position on undo.
             record_before_edit(cursor_x, cursor_y, FIRST_OF_MULTIPLE_EDITS);
             cursor_y += 1;
-            record_after_edit(cursor_x, cursor_y, EDIT_CHANGE_LINE);
+            record_after_edit(cursor_x, cursor_y, EDIT_MOVE_CURSOR);
             record_before_edit(cursor_x, cursor_y, LAST_OF_MULTIPLE_EDITS);
             insert_new_empty_line(cursor_y);
             record_after_edit(cursor_x, cursor_y, EDIT_INSERT_LINE);
@@ -133,6 +134,10 @@ void run_command(char c) {
         case 'D': // debug input by printing the ascii value of your inputs
             debug = !debug;
             system("clear");
+            break;
+        case 'm': // begin recording a macro
+            recording_macro = 1;
+            menu_alert = macro_msg;
             break;
         case '?': // show help info
             system("clear");
