@@ -45,21 +45,27 @@ void merge_line_upwards(int row) {
     if (row <= 0 || (document[row-1].len + document[row].len) > LINE_WIDTH)
         return;
     int last_line_len = document[row-1].len;
+    // Remember the initial cursor position.
+    record_before_edit(cursor_x, row, FIRST_OF_MULTIPLE_EDITS);
+    record_after_edit(cursor_x, cursor_y, EDIT_CHANGE_LINE);
     // move the current line up
-    record_before_edit(cursor_x, row-1, FIRST_OF_MULTIPLE_EDITS);
+    record_before_edit(cursor_x, row-1, MIDDLE_OF_MULTIPLE_EDITS);
     line_copy_range(&document[row-1], document[row-1].len, LINE_WIDTH, 
                     &document[row],   0,                   LINE_WIDTH);
-    //document[row-1].len = document[row-1].len + document[row].len;
     record_after_edit(cursor_x, row-1, EDIT_CHANGE_LINE);
     // empty out the old line
     record_before_edit(cursor_x, row, MIDDLE_OF_MULTIPLE_EDITS);
     document[row].len = 0;
     record_after_edit(cursor_x, cursor_y, EDIT_CHANGE_LINE);
     // remove the old line
-    record_before_edit(cursor_x, row, LAST_OF_MULTIPLE_EDITS);
+    record_before_edit(cursor_x, row, MIDDLE_OF_MULTIPLE_EDITS);
     delete_empty_line(row);
     record_after_edit(cursor_x, cursor_y, EDIT_DELETE_LINE);
     cursor_x = last_line_len;
+    // Move the cursor down a line.
+    record_before_edit(cursor_x, row, LAST_OF_MULTIPLE_EDITS);
+    cursor_y -= 1;
+    record_after_edit(cursor_x, cursor_y, EDIT_CHANGE_LINE);
 }
 
 void delete_empty_line(int row) {

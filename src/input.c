@@ -99,7 +99,6 @@ void handle_input(char c) {
         if (c == BACKSPACE) {
             if (cursor_x == 0 && cursor_y > 0) { // merge current and previous lines
                 merge_line_upwards(cursor_y);
-                cursor_y -= 1;
             }
             else if (line_len > 0) {             // delete the character next to the cursor
                 record_before_edit(cursor_x, cursor_y, SINGLE_EDIT);

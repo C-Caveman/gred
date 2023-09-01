@@ -62,15 +62,22 @@ void run_command(char c) {
             menu_save_file();
             break;
         case 'o': // insert new line below
+            // ugly hack: Cursor movement treated as an edit to preserve cursor position on undo.
+            record_before_edit(cursor_x, cursor_y, FIRST_OF_MULTIPLE_EDITS);
             cursor_y += 1;
-            record_before_edit(cursor_x, cursor_y, SINGLE_EDIT);
+            record_after_edit(cursor_x, cursor_y, EDIT_CHANGE_LINE);
+            record_before_edit(cursor_x, cursor_y, LAST_OF_MULTIPLE_EDITS);
             insert_new_empty_line(cursor_y);
             record_after_edit(cursor_x, cursor_y, EDIT_INSERT_LINE);
+            switch_mode(INSERT_MODE);
+            remember_mode(INSERT_MODE);
             break;
         case 'O': // insert new line above
             record_before_edit(cursor_x, cursor_y, SINGLE_EDIT);
             insert_new_empty_line(cursor_y);
-            record_after_edit(cursor_x, cursor_y-1, EDIT_INSERT_LINE);
+            record_after_edit(cursor_x, cursor_y, EDIT_INSERT_LINE);
+            switch_mode(INSERT_MODE);
+            remember_mode(INSERT_MODE);
             break;
         //                vi arrow keys
         case 'k': // up
@@ -239,7 +246,6 @@ void run_escape_code(int escape_code_index) {
     cur_escape_sequence.len = 0;
     clip_cursor_to_grid();
 }
-
 
 // add to the current escape code, return an index number for it if a match is found
 int build_escape_sequence(char c) {
