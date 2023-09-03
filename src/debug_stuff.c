@@ -15,6 +15,7 @@ void doi() {
     exit(0);
 }
 
+extern struct line last_input;
 void debug_input(char c) {
     //
     print_debug_mode(previous_mode);
@@ -23,7 +24,14 @@ void debug_input(char c) {
     //
     printf(": ASCII % 5d: \"", (int)c);
     print_debug_input(c);
-    printf("\"\n");
+    printf("\", I:");
+    for (int i=0; i<5; i++) {
+        putchar('\'');
+        print_debug_input(last_input.text[i]);
+        putchar('\'');
+        putchar(' ');
+    }
+    printf("\n");
 } 
 
 void print_debug_input(char c) {

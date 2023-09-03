@@ -9,6 +9,7 @@ struct line file_name = {13, 0, "new_file.txt"}; // document name
 // cursor location in the document
 int cursor_x = 0; // current character
 int cursor_y = 0; // current line
+int command = 0; // current command
 // special cursor for the menu
 int menu_cursor_x = 0;
 // message that can be changed at any time, resets after draw_screen() is done
@@ -142,7 +143,11 @@ void save_file(char* fname) {
     fclose(fp);
     
 }
-
+// DEBUG HACK <----------------------------------------- TODO remove
+char cur_char = '?';
+char last_command[64];
+extern struct line last_input;
+void (*menu)(char) = 0; // pointer to a menu function
 int main(int argc, char* argv[]) {
     // Make sure that the terminal supports alternative cursor types.
     mode_specific_cursors_enabled = check_vertical_bar_cursor_supported();
@@ -154,16 +159,24 @@ int main(int argc, char* argv[]) {
     update_settings_from_file_type(get_file_type(&file_name));
     cursor_y = 0;
     cursor_x = 0;
-    char c = '?';
     switch_mode(ESCAPE_MODE);
+    remember_mode(ESCAPE_MODE);
     redraw_full_screen = 1; // Fill the screen with the document.
     while (!quit) {
         if (debug)
-            debug_input(c); // Show detailed input info!
+            debug_input(cur_char); // Show detailed input info!
         else
             draw_screen();
-        c = getch();
-        handle_input(c);
+        cur_char = getch();
+        command = get_command(cur_char);
+        /*
+        if (menu != 0)
+            menu(cur_char); // menus handle commands differently
+        else
+        */
+            run_command(command);
+        snprintf(last_command, 64, "COMMAND: %.*s", last_input.len, last_input.text);
+        menu_alert = last_command;
     }
     system("clear");
     return 0;

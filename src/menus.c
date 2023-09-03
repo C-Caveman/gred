@@ -2,6 +2,8 @@
 // Menus such as the save_file() menu.
 #include "gred.h" 
 
+static void (*menu)(char) = 0;
+
 char insert_mode_help[] = "INSERT_MODE:    Press <escape> for ESCAPE_MODE";
 char escape_mode_help[] = "ESCAPE_MODE:    Press ? for help, or i to insert text.";
 char* menu_prompt = escape_mode_help;
@@ -18,14 +20,14 @@ enum menu_states {
 };
 int menu_state = MENU_CLOSED;
 
-// set which menu is shown
-void open_menu() {
-    in_menu = 1;
+// set which menu is shown (using the menu's function name)
+void open_menu(void* men) {
+    menu = (void (*)(char))(men);
     menu_state = MENU_READING_INPUT;
 }
 // hide the menu
 void close_menu() {
-    in_menu = 0;
+    menu = 0;
     menu_state = MENU_CLOSED;
     menu_input.len = 0;
     menu_cursor_x = 0;
@@ -93,7 +95,7 @@ void input_menu_char() {
 // menu for saving to a file
 char save_menu_prompt[] = "Save as: ";
 void menu_save_file() {
-    open_menu();
+    open_menu(menu);
     menu_prompt = save_menu_prompt;
     strncpy(menu_input.text, file_name.text, LINE_WIDTH-1);
     menu_input.len = strnlen(menu_input.text, LINE_WIDTH-1);
@@ -112,6 +114,7 @@ void menu_save_file() {
     strncpy(file_name.text, menu_input.text, LINE_WIDTH-1); // update cur filename
     file_name.len = menu_input.len;
     close_menu();
+    update_settings_from_file_type(get_file_type(&file_name));
 }
 
 // Search cursor
@@ -197,8 +200,6 @@ int search_backwards() {
 #define MATCH_INFO_SIZE 32
 char match_info[MATCH_INFO_SIZE];
 void search_loop() {
-    // Allow cursor to leave the menu.
-    in_menu = 0;
     // Show how to navigate.
     snprintf(match_info, MATCH_INFO_SIZE, "Search down/up: j/k");
     menu_alert = match_info;
@@ -236,7 +237,7 @@ void search_loop() {
 // menu for searching for a word
 char search_menu_prompt[] = "Find: ";
 void menu_search() {
-    open_menu();
+    open_menu(menu);
     menu_prompt = search_menu_prompt;
     menu_cursor_x = 0;
     while (1) {

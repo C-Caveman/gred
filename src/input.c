@@ -67,74 +67,46 @@ void handle_insert_mode_newline(int column, int row) {
     cursor_x = 0;
 }
 
-// Process a keystroke from the user.
-void handle_input(char c) {
+
+// Process a keystroke from the user in INSERT_MODE.
+void insert(char c) {
     int line_len = document[cursor_y].len;
-    // handle escape code
-    if (in_escape_sequence) {
-        run_escape_code(build_escape_sequence(c));
-        return;
-    }
-    // run escape codes or user commands
-    if (mode == ESCAPE_MODE) {
-        // enter a terminal escape sequence (used for arrow keys)
-        if (c == '[') {
-            in_escape_sequence = 1;
-            switch_mode(previous_mode); // return to the mode the user chose explicitly
+    if (c == BACKSPACE) {
+        if (cursor_x == 0 && cursor_y > 0) { // merge current and previous lines
+            merge_line_upwards(cursor_y);
         }
-        // run an escape mode command
-        else {
-            // prevent reverting to INSERT_MODE on next '[' char
-            switch_mode(ESCAPE_MODE);
-            remember_mode(ESCAPE_MODE); // user explicitly chose this mode
-            run_command(c);
+        else if (line_len > 0) {             // delete the character next to the cursor
+            record_before_edit(cursor_x, cursor_y, SINGLE_EDIT);
+            cursor_x = line_backspace(cursor_x, &document[cursor_y]);
+            record_after_edit(cursor_x, cursor_y, EDIT_CHANGE_LINE);
+        }
+        else if (line_len == 0 && cursor_y > 0) { // delete an empty line
+            record_before_edit(cursor_x, cursor_y, SINGLE_EDIT);
+            delete_empty_line(cursor_y);
+            cursor_y -= 1;
+            record_after_edit(cursor_x, cursor_y, EDIT_DELETE_LINE);
         }
         return;
     }
-    // INSERT_MODE
-    if (mode == INSERT_MODE && c != 0 && !in_escape_sequence) {
-        if (c == ESCAPE) {
-            switch_mode(ESCAPE_MODE);
-            cur_escape_sequence.len = 0;
-            return;
+    if (document[cursor_y].len < LINE_WIDTH) { // insert the current character
+        if (c == '\n') {
+            handle_insert_mode_newline(cursor_x, cursor_y);
         }
-        if (c == BACKSPACE) {
-            if (cursor_x == 0 && cursor_y > 0) { // merge current and previous lines
-                merge_line_upwards(cursor_y);
-            }
-            else if (line_len > 0) {             // delete the character next to the cursor
-                record_before_edit(cursor_x, cursor_y, SINGLE_EDIT);
-                cursor_x = line_backspace(cursor_x, &document[cursor_y]);
-                record_after_edit(cursor_x, cursor_y, EDIT_CHANGE_LINE);
-            }
-            else if (line_len == 0 && cursor_y > 0) { // delete an empty line
-                record_before_edit(cursor_x, cursor_y, SINGLE_EDIT);
-                delete_empty_line(cursor_y);
-                cursor_y -= 1;
-                record_after_edit(cursor_x, cursor_y, EDIT_DELETE_LINE);
-            }
-            return;
+        else if (isprint(c) && c != '\t') { // only insert printable characters!
+            record_before_edit(cursor_x, cursor_y, SINGLE_EDIT);
+            cursor_x = line_insert(c, cursor_x, &document[cursor_y]);
+            record_after_edit(cursor_x, cursor_y, EDIT_CHANGE_LINE);
         }
-        if (document[cursor_y].len < LINE_WIDTH) { // insert the current character
-            if (c == '\n') {
-                handle_insert_mode_newline(cursor_x, cursor_y);
+        else if (c == '\t') {
+            record_before_edit(cursor_x, cursor_y, SINGLE_EDIT);
+            if (!use_tabulators) {
+                for (int i=0; i<num_tab_spaces; i++)
+                    cursor_x = line_insert(' ', cursor_x, &document[cursor_y]);
             }
-            else if (isprint(c) && c != '\t') { // only insert printable characters!
-                record_before_edit(cursor_x, cursor_y, SINGLE_EDIT);
-                cursor_x = line_insert(c, cursor_x, &document[cursor_y]);
-                record_after_edit(cursor_x, cursor_y, EDIT_CHANGE_LINE);
-            }
-            else if (c == '\t') {
-                record_before_edit(cursor_x, cursor_y, SINGLE_EDIT);
-                if (!use_tabulators) {
-                    for (int i=0; i<num_tab_spaces; i++)
-                        cursor_x = line_insert(' ', cursor_x, &document[cursor_y]);
-                }
-                else {
-                    cursor_x = line_insert('\t', cursor_x, &document[cursor_y]);
-                }         
-                record_after_edit(cursor_x, cursor_y, EDIT_CHANGE_LINE);
-            }
+            else {
+                cursor_x = line_insert('\t', cursor_x, &document[cursor_y]);
+            }         
+            record_after_edit(cursor_x, cursor_y, EDIT_CHANGE_LINE);
         }
     }
 }
