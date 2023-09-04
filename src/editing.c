@@ -2,13 +2,13 @@
 // Editing lines of text.
 #include "gred.h"
 int line_backspace(int cursor_x_pos, struct line* l) {
-    if (cursor_x_pos == 0 || cursor_x_pos > l->len) // invalid delete
+    if (cursor_x_pos < 1 || cursor_x_pos > l->len) // invalid delete
         return cursor_x_pos;
     l->text[l->len] = '\0'; // prevent out-of-range data from being pulled in
     for (int i=cursor_x_pos-1; i < l->len; i++)
         l->text[i] = l->text[i+1];
     l->text[l->len] = '0';
-    l->len -= 1;
+    l->len = (l->len > 0) ? l->len-1 : 0; // Reduce length if greater than zero.
     return (cursor_x_pos - 1);
 }
 

@@ -25,44 +25,9 @@ char macro_msg[] = "Press <escape> twice to end the macro.";
 
 
 /////////////////////////////////////////////////////////////////////////////////
-// Commands!
+// Commands! (enum is in gred.h)
 //
 
-enum COMMANDS_ENUM {
-    NO_COMMAND,
-    LEFT,
-    RIGHT,
-    UP,
-    DOWN,
-    GOTO_LINE_START,
-    GOTO_LINE_END,
-    GOTO_DOCUMENT_TOP,
-    GOTO_DOCUMENT_BOTTOM,
-    SCROLL_UP,
-    SCROLL_DOWN,
-    SCROLL_LEFT,
-    SCROLL_RIGHT,
-    SCROLL_PAGE_UP,
-    SCROLL_PAGE_DOWN,
-    SEARCH,
-    UNDO,
-    REDO,
-    DELETE,
-    INSERT, //TODO rethink this <--------------------------------- TODO
-    SWITCH_TO_INSERT_MODE,
-    SWITCH_TO_INSERT_MODE_AT_START_OF_LINE,
-    SWITCH_TO_INSERT_MODE_AT_END_OF_LINE,
-    SWITCH_TO_INSERT_MODE_IN_NEW_LINE_BELOW,
-    SWITCH_TO_INSERT_MODE_IN_NEW_LINE_ABOVE,
-    LINE_NUMBERS,
-    SECRET,
-    COLORIZE,
-    DEBUG,
-    MACRO,
-    SAVE,
-    QUIT,
-    HELP,
-};
 // Key binds for commands.
 #define MAX_BINDING_LEN 16
 struct binding {
@@ -113,7 +78,6 @@ static struct binding bindings[] = {
     {"[colors", COLORIZE}, // keyword color-coding
     {0, 0} // Null terminator, ends the list.
 };
-
 // run a command from the commands enum in gred.h (can be from a keybind or an escape code)
 void run_command(int command_id) {
     switch(command_id) {
@@ -178,7 +142,7 @@ void run_command(int command_id) {
             cursor_y += screen_height-1;
             break;
         case SEARCH:
-            open_menu((void*)menu_search);
+            open_menu(&menu_search);
             break;
         //
         // EDITING:
@@ -253,7 +217,7 @@ void run_command(int command_id) {
         // SAVE and QUIT:
         //
         case SAVE:
-            open_menu((void*)menu_save_file);
+            open_menu(&menu_save_file);
             break;
         case QUIT:
             quit = 1; // Exit the program.
@@ -284,12 +248,11 @@ void run_command(int command_id) {
 // check if input matches a bound input (keybind or escape sequence).
 // Return the id number of the match's command, otherwise return NO_COMMAND.
 struct line input;
-struct line last_input;
 int command_len = 0;
 int get_command(char c) {
     // Handle the ESCAPE character first.
     if (c == ESCAPE || input.len >= MAX_BINDING_LEN-2) {
-        switch_mode(ESCAPE_MODE);
+        switch_mode(COMMAND_MODE);
         input.len = 0;
         input.text[0] = 0; // null terminate
         return NO_COMMAND;
@@ -302,7 +265,6 @@ int get_command(char c) {
     input.text[input.len] = c;
     input.len += 1;
     input.text[input.len] = 0; // null terminate
-    copy_line(&last_input, &input);
     int cur_bind_len = 0;
     int matched_chars = 0;
     int partial_match_found = 0;
@@ -372,8 +334,8 @@ char help_pages[NUM_HELP_PAGES][MAX_HELP_PAGE_LEN] = {
     "Press i to enter INSERT_MODE\n"
     "You can then type in text as you would expect.\n"
     "\n"
-    "Press <escape> to enter ESCAPE_MODE\n"
-    "In ESCAPE_MODE you can:\n"
+    "Press <escape> to enter COMMAND_MODE\n"
+    "In COMMAND_MODE you can:\n"
     "    Save:         s CTRL_S\n"
     "    Quit:         q x\n"
     "    Undo:         u\n"
@@ -387,9 +349,9 @@ char help_pages[NUM_HELP_PAGES][MAX_HELP_PAGE_LEN] = {
     "Press ? again for more help."
 },
 {
-    "ESCAPE_MODE is for running various commands.\n"
+    "COMMAND_MODE is for running various commands.\n"
     "You can save, undo/redo, ect. in this mode.\n"
-    "Press <escape> at any time to enter ESCAPE_MODE.\n"
+    "Press <escape> at any time to enter COMMAND_MODE.\n"
     "\n"
     "INSERT_MODE is for normal text editing.\n"
     "Type some text, and it goes where "

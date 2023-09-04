@@ -2,113 +2,102 @@
 // Menus such as the save_file() menu.
 #include "gred.h" 
 
-static void (*menu)(char) = 0;
+void (*menu)() = 0; // Pointer to the current menu function.
+int cursor_in_menu = 0;
+int reading_menu_input = 0;
+int menu_was_just_opened = 0;
+// special cursor for the menu
+int menu_cursor_x = 0;
 
-char insert_mode_help[] = "INSERT_MODE:    Press <escape> for ESCAPE_MODE";
-char escape_mode_help[] = "ESCAPE_MODE:    Press ? for help, or i to insert text.";
+char insert_mode_help[] = "INSERT_MODE:    Press <escape> for COMMAND_MODE";
+char escape_mode_help[] = "COMMAND_MODE:   Press ? for help, or i to insert text.";
 char* menu_prompt = escape_mode_help;
 
-// Used for managing the current menu. See menu_save_file() for an example.
-enum menu_states {
-    MENU_CLOSED,
-    MENU_READING_INPUT,  // Typing into the menu_input buffer.
-    MENU_ENTER_DETECTED, // Hit enter after typing into menu_input.
-    MENU_ESCAPE_DETECTED,
-    MENU_DOUBLE_ESCAPE_DETECTED, // Confirmed exit from menu.
-    MENU_IN_ESCAPE_SEQUENCE, // Handling arrow keys in menu.
-    NUM_MENU_STATES
-};
-int menu_state = MENU_CLOSED;
-
 // set which menu is shown (using the menu's function name)
-void open_menu(void* men) {
-    menu = (void (*)(char))(men);
-    menu_state = MENU_READING_INPUT;
+void open_menu(void (*men)()) {
+    menu = men;
+    // Reset menu cursor.
+    menu_cursor_x = 0;
+    // Put cursor in the menu.
+    cursor_in_menu = 1;
+    // Empty out the menu text box.
+    menu_input.len = 0;
+    menu_input.text[0] = 0;
+    // Start reading into menu_input.
+    reading_menu_input = 1;
+    // Ignore the first character input.
+    cur_char = 0;
+    // Tell the menu that is was just opened.
+    menu_was_just_opened = 1;
 }
 // hide the menu
 void close_menu() {
     menu = 0;
-    menu_state = MENU_CLOSED;
+    cursor_in_menu = 0;
     menu_input.len = 0;
+    menu_input.text[0] = 0;
     menu_cursor_x = 0;
-    if (mode == ESCAPE_MODE)
+    if (mode == COMMAND_MODE)
         menu_prompt = escape_mode_help;
     if (mode == INSERT_MODE)
         menu_prompt = insert_mode_help;
+    // Stop reading into menu_input
+    reading_menu_input = 0;
+    // Make sure this gets reset, just in case.
+    menu_was_just_opened = 0;
 }
 
-// read input for a menu (see menu_save_file() for an example of how to use this)
-char menu_exit_prompt[] = "Press Escape again to exit menu.";
-void input_menu_char() {
-    char c = getch();
-    if (menu_state == MENU_ESCAPE_DETECTED && c == ESCAPE) {
-        menu_state = MENU_DOUBLE_ESCAPE_DETECTED;
-        return;
-    }
-    if (menu_state == MENU_ESCAPE_DETECTED && c == '[') {
-        menu_state = MENU_IN_ESCAPE_SEQUENCE;
-        return;
-    }
-    if (menu_state == MENU_IN_ESCAPE_SEQUENCE) {
-            switch(c) {
-            // These are the escape codes for the arrow keys!
-            case 'D': // left
-                menu_cursor_x -= 1;
-                break;
-            case 'C': // right
-                menu_cursor_x += 1;
-                break;
-            case 'A': // up
-                //menu_cursor_y -= 1;
-                break;
-            case 'B': // down
-                //menu_cursor_y += 1;
-                break;
-            default:
-        }
-        if (menu_cursor_x < 0)
-            menu_cursor_x = 0;
-        if (menu_cursor_x > menu_input.len)
-            menu_cursor_x = menu_input.len;
-        menu_state = MENU_READING_INPUT; // return to reading input normally
-        return;
-    }
-    switch (c) {
+// Exit menu if escape was just pressed twice.
+char menu_exit_prompt[] = "Press <escape> again to exit the menu.";
+void double_escape_menu_exit() {
+    if (cur_char == ESCAPE && prev_char == ESCAPE)
+        close_menu();
+    else if (cur_char == ESCAPE)
+        menu_alert = menu_exit_prompt;
+}
+
+// Return 1 if still reading input, return 0 when finished.
+int read_menu_input() {
+    if (reading_menu_input == 0)
+        return 0;
+    // Handle the menu input.
+    switch (cur_char) {
         case '\n':
-            menu_state = MENU_ENTER_DETECTED;
-            return;
+            reading_menu_input = 0;
+            return 1;
         case ESCAPE:
-            menu_state = MENU_ESCAPE_DETECTED;
-            menu_alert = menu_exit_prompt;
-            return;
+            break;
         case BACKSPACE:
             menu_cursor_x = line_backspace(menu_cursor_x, &menu_input);
             break;
         default:
-            menu_cursor_x = line_insert(c, menu_cursor_x, &menu_input);
+            // Allow cursor movement.
+            if (command == LEFT && cur_char != 'h')
+                menu_cursor_x -= 1;
+            else if (command == RIGHT && cur_char != 'l')
+                menu_cursor_x += 1;
+            // Insert text if not in an escape sequence.
+            else if (input.text[0] != '[' && isprint(cur_char))
+                menu_cursor_x = line_insert(cur_char, menu_cursor_x, &menu_input);
             break;
     }
-    menu_state = MENU_READING_INPUT;
-    return;
+    menu_cursor_x = bound_value(menu_cursor_x, 0, menu_input.len);
+    return 1; // Still reading input.
 }
 
 // menu for saving to a file
 char save_menu_prompt[] = "Save as: ";
 void menu_save_file() {
-    open_menu(menu);
     menu_prompt = save_menu_prompt;
-    strncpy(menu_input.text, file_name.text, LINE_WIDTH-1);
-    menu_input.len = strnlen(menu_input.text, LINE_WIDTH-1);
-    menu_cursor_x = menu_input.len;
-    while (1) {
-        draw_screen();
-        input_menu_char();
-        if (menu_state == MENU_ENTER_DETECTED)
-            break;
-        if (menu_state == MENU_DOUBLE_ESCAPE_DETECTED) {
-            close_menu();
-            return; // cancel the file save
-        }
+    // Put the file name into menu_input if it is empty.
+    if (menu_was_just_opened) {
+        copy_line(&menu_input, &file_name);
+        menu_cursor_x = menu_input.len;
+    }
+    menu_was_just_opened = 0;
+    read_menu_input();
+    if (reading_menu_input) {
+        return;
     }
     save_file(menu_input.text);
     strncpy(file_name.text, menu_input.text, LINE_WIDTH-1); // update cur filename
@@ -197,63 +186,53 @@ int search_backwards() {
     return found_y;
 }
 
+// Search for a pattern in the document.
 #define MATCH_INFO_SIZE 32
 char match_info[MATCH_INFO_SIZE];
-void search_loop() {
-    // Show how to navigate.
-    snprintf(match_info, MATCH_INFO_SIZE, "Search down/up: j/k");
-    menu_alert = match_info;
-    char c;
-    int found_y = -1;
-    while (1) {
-        draw_screen();
-        menu_alert = match_info;
-        c = getch();
-        search_x = cursor_x;
-        search_y = cursor_y;
-        switch(c) {
-            case 'j': // down
-                found_y = search_forwards(cursor_x, cursor_y);
-                snprintf(match_info, MATCH_INFO_SIZE, "No matches below.");
-                break;
-            case 'k': // up
-                found_y = search_backwards(cursor_x, cursor_y);
-                snprintf(match_info, MATCH_INFO_SIZE, "No matches above.");
-                break;
-            default:
-                snprintf(match_info, MATCH_INFO_SIZE, "Search terminated.");
-                return;
-        };
-        if (found_y != -1) {
-            cursor_y = search_y;
-            cursor_x = search_x;
-            snprintf(match_info, MATCH_INFO_SIZE, "Match!");
-            // Scroll the screen as far left as possible
-            text_display_x_start = 0;
-        }
-    }
-}
-
-// menu for searching for a word
 char search_menu_prompt[] = "Find: ";
+char search_menu_prompt_2[] = "Finding: ";
+char search_menu_help[] = "Search UP or DOWN (k/j)";
 void menu_search() {
-    open_menu(menu);
+    // Set the prompt.
     menu_prompt = search_menu_prompt;
-    menu_cursor_x = 0;
-    while (1) {
-        draw_screen();
-        input_menu_char();
-        if (menu_state == MENU_ENTER_DETECTED) { // TODO search!
-            if (menu_input.len < 1) // Anything to search for?
-                break;
-            // Search for a match!
-            search_loop();
+    // Get the search pattern before we enter the menu.
+    read_menu_input();
+    if (reading_menu_input)
+        return;
+    // Indicate that menu_input is done reading.
+    menu_prompt = search_menu_prompt_2;
+    // Put cursor in the document.
+    cursor_in_menu = 0;
+    // Show the help info for this menu.
+    if (menu_was_just_opened == 1)
+        menu_alert = search_menu_help;
+    menu_was_just_opened = 0;
+    int found_y = -1;
+    search_x = cursor_x;
+    search_y = cursor_y;
+    switch(command) {
+        case DOWN: // down
+            found_y = search_forwards(cursor_x, cursor_y);
             break;
-        }
-        if (menu_state == MENU_DOUBLE_ESCAPE_DETECTED) {
-            close_menu();
-            return; // cancel the file save
-        }
+        case UP: // up
+            found_y = search_backwards(cursor_x, cursor_y);
+            break;
+        case QUIT:
+            menu_alert = 0;
+            close_menu(); // exit the menu
+            break;
+        default:
+            if (command != NO_COMMAND || cur_char == '/') {
+                menu_alert = 0;
+                close_menu(); // exit the menu
+            }
+            break;
     }
-    close_menu();
+    if (found_y != -1) {
+        cursor_y = search_y;
+        cursor_x = search_x;
+        snprintf(match_info, MATCH_INFO_SIZE, "Match!");
+        // Scroll the screen as far left as possible
+        text_display_x_start = 0;
+    }
 }

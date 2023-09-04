@@ -19,8 +19,8 @@ struct line {
     // If you add another member, you must update the copy_line() function in gred.c!
 };
 enum line_flags { // properties a line can have
-    CHANGED= 0b1,
-    WRAPPED=0b10,
+    CHANGED=  0b1,
+    WRAPPED= 0b10,
 };
 
 // Information used to undo/redo changes to a document.
@@ -57,7 +57,7 @@ enum edit_sequence_types { // for linking multiple edits to be undone/redone at 
 // The editor has 2 modes, insert mode for typing, and escape mode for everything else.
 enum modes { // for escape codes
     INSERT_MODE,
-    ESCAPE_MODE,
+    COMMAND_MODE,
     NUM_MODES
 };
 
@@ -66,7 +66,7 @@ enum modes { // for escape codes
 extern struct line document[MAX_LINES];
 
 // Editor mode:
-extern int mode; // INSERT_MODE or ESCAPE_MODE
+extern int mode; // INSERT_MODE or COMMAND_MODE
 extern int previous_mode; // last mode used (used to revert the mode after an escape sequence)
 extern int recording_macro;
 
@@ -74,9 +74,11 @@ extern int recording_macro;
 extern int cursor_x; // where we are in the document
 extern int cursor_y;
 
-// Current command:
+// Current command and input character:
 extern int command;
+extern struct line input; // Invocation of the command.
 extern char cur_char;
+extern char prev_char;
 
 // Screen data:
 extern struct line file_name; // Name of current file.
@@ -92,8 +94,11 @@ extern int total_line_number_width; // full width of the line numbers section, i
 extern int menu_height; // how many lines tall the menu is
 
 // Menu:
-//extern void (*menu)(char); // pointer to a menu function
+extern void (*menu)(); // pointer to a menu function
+extern int cursor_in_menu; // If the cursor is in the menu.
 extern int menu_cursor_x;
+extern int reading_menu_input;
+extern int menu_was_just_opened;
 extern struct line menu_input; // Text input to the current menu.
 extern char* menu_prompt;// Text displayed by the current menu.
 extern char* menu_alert; // Message that can be set anywhere, disapears next time a key is pressed.
@@ -116,6 +121,10 @@ extern struct line cur_escape_sequence; // current escape code (omitting the ini
 extern int quit; // if exiting the editor or not
 extern int debug; // if displaying input debug information or not (disables normal text)
 
+
+
+
+
 #define BACKSPACE 127
 #define ESCAPE 27
 #define CTRL_S 19
@@ -125,6 +134,8 @@ extern int debug; // if displaying input debug information or not (disables norm
 //
 // show the document and the menu
 void draw_screen();
+// redraw the menu
+void draw_menu();
 // keep the cursor from leaving the document
 void clip_cursor_to_grid();
 void display_line_highlighted(struct line* l, int left_index, int right_index);
@@ -175,8 +186,10 @@ void run_escape_code(int escape_code_index);
 //
 // Menus:
 //
-// open a menu using a function pointer (must return void and accept a char argument)
-void open_menu(void* men); // casts to function pointer: void (*funky)(char)
+// open a menu using a function pointer (uses "cur_char" and "command" for input)
+void open_menu(void (*cur_menu)());
+// Exit current menu if escape was double-tapped.
+void double_escape_menu_exit();
 // save_file menu
 void menu_save_file();
 // search menu
@@ -211,6 +224,44 @@ void doi(); // Print "DOI!!!" and quit.
 // misc utilites
 int bound_value(int v, int min, int max); // clips value to [min, max]
 
+//
+// Commands:
+//
+enum COMMANDS_ENUM {
+    NO_COMMAND,
+    LEFT,
+    RIGHT,
+    UP,
+    DOWN,
+    GOTO_LINE_START,
+    GOTO_LINE_END,
+    GOTO_DOCUMENT_TOP,
+    GOTO_DOCUMENT_BOTTOM,
+    SCROLL_UP,
+    SCROLL_DOWN,
+    SCROLL_LEFT,
+    SCROLL_RIGHT,
+    SCROLL_PAGE_UP,
+    SCROLL_PAGE_DOWN,
+    SEARCH,
+    UNDO,
+    REDO,
+    DELETE,
+    INSERT, //TODO rethink this <--------------------------------- TODO
+    SWITCH_TO_INSERT_MODE,
+    SWITCH_TO_INSERT_MODE_AT_START_OF_LINE,
+    SWITCH_TO_INSERT_MODE_AT_END_OF_LINE,
+    SWITCH_TO_INSERT_MODE_IN_NEW_LINE_BELOW,
+    SWITCH_TO_INSERT_MODE_IN_NEW_LINE_ABOVE,
+    LINE_NUMBERS,
+    SECRET,
+    COLORIZE,
+    DEBUG,
+    MACRO,
+    SAVE,
+    QUIT,
+    HELP,
+};
 extern char secret_message[];
 
 #endif

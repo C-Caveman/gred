@@ -6,7 +6,7 @@ extern int previous_mode;
 #define MAX_MODE_NAME_LEN 32
 char mode_names[NUM_MODES][MAX_MODE_NAME_LEN] = {
     "INSERT_MODE",
-    "ESCAPE_MODE",
+    "COMMAND_MODE",
 };
 
 void doi() {
@@ -15,7 +15,7 @@ void doi() {
     exit(0);
 }
 
-extern struct line last_input;
+//extern struct line last_input;
 void debug_input(char c) {
     //
     print_debug_mode(previous_mode);
@@ -25,12 +25,14 @@ void debug_input(char c) {
     printf(": ASCII % 5d: \"", (int)c);
     print_debug_input(c);
     printf("\", I:");
+    /*
     for (int i=0; i<5; i++) {
         putchar('\'');
         print_debug_input(last_input.text[i]);
         putchar('\'');
         putchar(' ');
     }
+    */
     printf("\n");
 } 
 
@@ -56,8 +58,8 @@ void print_debug_input(char c) {
 
 void print_debug_mode(int state) {
     switch (state) {
-        case ESCAPE_MODE:
-            printf("ESCAPE_MODE");
+        case COMMAND_MODE:
+            printf("COMMAND_MODE");
             break;
         case INSERT_MODE:
             printf("INSERT_MODE");

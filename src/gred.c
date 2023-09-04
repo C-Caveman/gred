@@ -10,16 +10,14 @@ struct line file_name = {13, 0, "new_file.txt"}; // document name
 int cursor_x = 0; // current character
 int cursor_y = 0; // current line
 int command = 0; // current command
-// special cursor for the menu
-int menu_cursor_x = 0;
 // message that can be changed at any time, resets after draw_screen() is done
 char* menu_alert = 0;
 // Text input to the menu.
 struct line menu_input;
 int in_escape_sequence = 0;
 struct line cur_escape_sequence = {0, 0, ""};
-int previous_mode = ESCAPE_MODE;
-int mode = ESCAPE_MODE;
+int previous_mode = COMMAND_MODE;
+int mode = COMMAND_MODE;
 int quit = 0;
 int debug = 0;
 
@@ -145,9 +143,7 @@ void save_file(char* fname) {
 }
 // DEBUG HACK <----------------------------------------- TODO remove
 char cur_char = '?';
-char last_command[64];
-extern struct line last_input;
-void (*menu)(char) = 0; // pointer to a menu function
+char prev_char = '?';
 int main(int argc, char* argv[]) {
     // Make sure that the terminal supports alternative cursor types.
     mode_specific_cursors_enabled = check_vertical_bar_cursor_supported();
@@ -159,24 +155,26 @@ int main(int argc, char* argv[]) {
     update_settings_from_file_type(get_file_type(&file_name));
     cursor_y = 0;
     cursor_x = 0;
-    switch_mode(ESCAPE_MODE);
-    remember_mode(ESCAPE_MODE);
+    switch_mode(COMMAND_MODE);
+    remember_mode(COMMAND_MODE);
     redraw_full_screen = 1; // Fill the screen with the document.
+    menu = 0;
     while (!quit) {
-        if (debug)
-            debug_input(cur_char); // Show detailed input info!
-        else
-            draw_screen();
+        // Show the screen.
+        draw_screen();
+        // Get the next key that the user pressed.
+        prev_char = cur_char;
         cur_char = getch();
+        // Exit from current menu if escape was double-tapped.
+        double_escape_menu_exit();
+        // Parse the input to determine the command.
         command = get_command(cur_char);
-        /*
-        if (menu != 0)
-            menu(cur_char); // menus handle commands differently
-        else
-        */
+        // Don't run commands when in a menu.
+        if (menu == 0) 
             run_command(command);
-        snprintf(last_command, 64, "COMMAND: %.*s", last_input.len, last_input.text);
-        menu_alert = last_command;
+        // Run the current menu.
+        if (menu != 0)
+            menu();
     }
     system("clear");
     return 0;

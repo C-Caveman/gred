@@ -28,7 +28,7 @@ char getch() {
 // swap between editing and running commands
 void switch_mode(int next_mode) {
     mode = next_mode;
-    if (mode == ESCAPE_MODE) {
+    if (mode == COMMAND_MODE) {
         menu_prompt = escape_mode_help;
     }
     if (mode == INSERT_MODE) {

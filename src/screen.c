@@ -2,8 +2,6 @@
 // Screen for displaying the document, line numbers, menus, ect.
 #include "gred.h"
 
-extern void (*menu)(char);
-
 // Previous values of settings.
 int old_show_line_numbers = 1;
 int old_top_line_of_screen = 0; // vertical scroll distance
@@ -44,8 +42,6 @@ void clear_line(int i) {
     printf("\r%*c\r", screen_width, ' ');
 }
 
-//TODO remove this <----------------------------------------------------------------- TODO
-extern struct line last_input;
 void draw_menu() {
     // clear menu line 1
     move_cursor(0, total_screen_height-2);
@@ -63,6 +59,11 @@ void draw_menu() {
 
 // Redraw the screen (skipping unchanged lines)
 void draw_screen() {
+    // If we are debugging, show the input info, not the document.
+    if (debug) {
+        debug_input(cur_char); // Show detailed input info!
+        return;
+    }
     // Keep the cursor inside the document.
     clip_cursor_to_grid();
     // Redraw the screen if needed.
@@ -105,12 +106,12 @@ void draw_screen() {
     // Always redraw the menu.
     draw_menu();
     // Put the cursor in correct part of the screen.
-    if (menu != 0) // If menu_prompt is longer than 32 chars, cut it off.
+    if (cursor_in_menu) // If menu_prompt is longer than 32 chars, cut it off.
         move_cursor(strnlen(menu_prompt, 32)+menu_cursor_x, screen_height+menu_height);
     else
         move_cursor(cursor_x-text_display_x_start+total_line_number_width, cursor_y-top_line_of_screen);
     // Change the cursor.
-    if (mode == ESCAPE_MODE) {
+    if (mode == COMMAND_MODE) {
         // Solid block cursor shown when in escape mode.
         if (mode_specific_cursors_enabled)
             printf("\033[2 q");
