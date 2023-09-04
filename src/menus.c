@@ -52,7 +52,7 @@ char menu_exit_prompt[] = "Press <escape> again to exit the menu.";
 void double_escape_menu_exit() {
     if (cur_char == ESCAPE && prev_char == ESCAPE)
         close_menu();
-    else if (cur_char == ESCAPE)
+    else if (cur_char == ESCAPE && menu != 0) // Only show this if in a menu.
         menu_alert = menu_exit_prompt;
 }
 
