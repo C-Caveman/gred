@@ -10,7 +10,7 @@ int menu_was_just_opened = 0;
 int menu_cursor_x = 0;
 
 char insert_mode_help[] = "INSERT_MODE:    Press <escape> for COMMAND_MODE";
-char escape_mode_help[] = "COMMAND_MODE:   Press ? for help, or i to insert text.";
+char escape_mode_help[] = "COMMAND_MODE:   Press <?> for help.";
 char* menu_prompt = escape_mode_help;
 
 // set which menu is shown (using the menu's function name)

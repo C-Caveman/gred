@@ -66,6 +66,7 @@ enum modes { // for escape codes
 // Document being edited:
 extern struct line document[MAX_LINES];
 extern struct line file_name; // Name of current document.
+extern int in_tutorial;
 
 // Editor mode:
 extern int mode; // INSERT_MODE or COMMAND_MODE
@@ -90,8 +91,8 @@ extern int display_text_x_end; // index of rightmost char displayed on the scree
 extern int display_text_height; // number of document lines that are displayed at once
 extern int display_full_height; // terminal height (# of lines)
 extern int display_full_width; // number of document characters that fit on screen
-extern int redraw_full_screen; // flag for redrawing the full screen
-extern int total_line_number_width; // full width of the line numbers section, includes padding
+extern int display_redraw_all; // flag for redrawing the full screen
+extern int display_line_number_width; // full width of the line numbers section, includes padding
 extern int menu_height; // how many lines tall the menu is
 
 // Menu:
@@ -146,6 +147,8 @@ int check_vertical_bar_cursor_supported();
 //
 // Document editing functions:
 //
+// Load a text file.
+void load_file(char* fname);
 // Handle a character input in INSERT_MODE
 void insert(char c);
 // copy line a's text and length into b

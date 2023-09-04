@@ -70,7 +70,7 @@ void draw_screen() {
     if ((old_show_line_numbers != show_line_numbers) ||
         (display_text_top_old != display_text_top) ||
         (old_display_text_x_start != display_text_x_start)) {
-        redraw_full_screen = 1;
+        display_redraw_all = 1;
     }
     // get info about the screen
     struct winsize w;
@@ -80,13 +80,13 @@ void draw_screen() {
     display_full_width = w.ws_col;
     // determine the width occupied by the line numbers
     int line_number_width = find_num_width(display_text_top+display_text_height);
-    total_line_number_width = 0;
+    display_line_number_width = 0;
     if (show_line_numbers)
-        total_line_number_width = line_number_width + 2; // The 2 extra chars: ": "
+        display_line_number_width = line_number_width + 2; // The 2 extra chars: ": "
     clip_cursor_to_grid(); // clip the horizontal scrolling as well
     for (int i=display_text_top; i<display_text_top+display_text_height; i++) {
         // Skip unedited lines (if not refreshing whole screen)
-        if (!redraw_full_screen && !(document[i].flags & CHANGED))
+        if (!display_redraw_all && !(document[i].flags & CHANGED))
             continue;
         // mark line as unchanged again
         document[i].flags &= ~CHANGED;
@@ -109,7 +109,7 @@ void draw_screen() {
     if (cursor_in_menu) // If menu_prompt is longer than 32 chars, cut it off.
         move_cursor(strnlen(menu_prompt, 32)+menu_cursor_x, display_text_height+menu_height);
     else
-        move_cursor(cursor_x-display_text_x_start+total_line_number_width, cursor_y-display_text_top);
+        move_cursor(cursor_x-display_text_x_start+display_line_number_width, cursor_y-display_text_top);
     // Change the cursor.
     if (mode == COMMAND_MODE) {
         // Solid block cursor shown when in escape mode.
@@ -126,7 +126,7 @@ void draw_screen() {
     old_show_line_numbers = show_line_numbers;
     old_display_text_x_start = display_text_x_start;
     // No longer need to refresh the entire screen.
-    redraw_full_screen = 0;
+    display_redraw_all = 0;
 }
 
 

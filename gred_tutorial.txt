@@ -1,37 +1,35 @@
-Welcome to Gred, the Grid-based text Editor!
 ============================================
+: NAVIGATION :
+==============
+Cursor movement:
 
--------------------------
-<Navigation>
-------------
-Move the cursor:
+   <k>         ↑  
+<h> · <l>    ← · →    Arrow keys also work.
+   <j>         ↓
 
-  k        ↑  
-h · l    ← · →    Arrow also work.
-  j        ↓
-
-Move the screen:
+Scroll the screen:
   
-  K        ↑  
-H · L    ← · →
-  J        ↓
+   <K>         ↑  
+<H> · <L>    ← · →
+   <J>         ↓
 
-Search for word:
-/
+Search for word: </>
 
---------------------------
-<Modes>
----------
-Press i to enter INSERT_MODE.
+============================================
+: MODES :
+=========
+Insert text with INSERT_MODE: <i>
 
-In INSERT_MODE, you can:
-    >type text into the document
+Run commands with COMMAND_MODE: <escape>
 
-
-Press <ESCAPE> to enter ESCAPE_MODE.
-
-In ESCAPE_MODE, you can:
-    >save with: s
-    >quit with: q
-    >navigate:  h j k l
-    >
+COMMAND_MODE Commands:
+    <s>  save
+    <q>  quit
+    </>  search
+    <i>  switch to INSERT_MODE
+    <I>  switch to INSERT_MODE at the start of the line
+    <a>  switch to INSERT_MODE at the end of the line
+    <o>  switch to INSERT_MODE on a new line below
+    <O>  switch to INSERT_MODE on a new line above
+    <n>  toggle line numbers
+    

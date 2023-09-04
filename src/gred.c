@@ -35,9 +35,9 @@ int display_full_width = 0;
 int display_text_top = 0; // vertical scrolling
 int display_text_x_start = 0; // horizontal scrolling
 int display_text_x_end = 0; // last column of text to show
-int total_line_number_width = 0; // space occupied by the line number section
+int display_line_number_width = 0; // space occupied by the line number section
 int display_text_width = 0; // width of displayed lines
-int redraw_full_screen = 1; // whether to redraw the entire screen
+int display_redraw_all = 1; // whether to redraw the entire screen
 
 // Keep value within [min, max]
 int bound_value(int v, int min, int max) {
@@ -59,13 +59,13 @@ void clip_cursor_to_grid() {
     if (cursor_x < display_text_x_start) {
         display_text_x_start = cursor_x;
     }
-    int last_screen_column = display_full_width-total_line_number_width-1;
+    int last_screen_column = display_full_width-display_line_number_width-1;
     int column_cursor_delta = cursor_x - display_text_x_start;
     if (column_cursor_delta > last_screen_column) {
         display_text_x_start = (cursor_x-last_screen_column);
     }
-    display_text_x_end = display_text_x_start+display_full_width-total_line_number_width;
-    display_text_width = display_full_width-total_line_number_width; // width of text display area
+    display_text_x_end = display_text_x_start+display_full_width-display_line_number_width;
+    display_text_width = display_full_width-display_line_number_width; // width of text display area
     //
     // vertical adjustment
     //
@@ -81,7 +81,7 @@ void clip_cursor_to_grid() {
         display_text_top = 0;
     // if we scrolled the screen, redraw the whole thing
     if (display_text_top != display_text_top_old)
-        redraw_full_screen = 1;
+        display_redraw_all = 1;
 }
 
 void load_file(char* fname) {
@@ -92,6 +92,9 @@ void load_file(char* fname) {
         printf("File %s could not be opened.\n", fname);
         return;
     }
+    // Clear out any text that may be in the document already.
+    for (int i=0; i<MAX_LINES; i++)
+        document[i].len = 0;
     // read the file into the document line by line
     while (1) {
         // TODO allow larger documents in the future TODO <----------------------- TODO
@@ -120,6 +123,8 @@ void load_file(char* fname) {
     fclose(fp);
     // Update the settings for tabulators/spaces based on the filename suffix.
     update_settings_from_file_type(get_file_type(&file_name));
+    // Redraw the screen.
+    display_redraw_all = 1;
 }
 
 void save_file(char* fname) {
@@ -155,7 +160,7 @@ int main(int argc, char* argv[]) {
     cursor_x = 0;
     switch_mode(COMMAND_MODE);
     remember_mode(COMMAND_MODE);
-    redraw_full_screen = 1; // Fill the screen with the document.
+    display_redraw_all = 1; // Redraw the screen.
     menu = 0;
     while (!quit) {
         // Show the screen.
@@ -167,6 +172,9 @@ int main(int argc, char* argv[]) {
         double_escape_menu_exit();
         // Parse the input to determine the command.
         command = get_command(cur_char);
+        // Show the current input.
+        if (menu_alert == 0)
+            menu_alert = input.text;
         // Don't run commands when in a menu.
         if (menu == 0) 
             run_command(command);
