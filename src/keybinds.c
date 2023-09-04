@@ -6,11 +6,9 @@
 extern struct line document[MAX_LINES];
 extern int cursor_x;
 extern int cursor_y;
-extern int top_line_of_screen;
-extern int screen_height;
+extern int display_text_top;
+extern int display_text_height;
 extern char* menu_alert;
-extern int in_escape_sequence;
-extern struct line cur_escape_sequence;
 extern int show_line_numbers;
 extern int quit;
 extern int debug;
@@ -114,32 +112,32 @@ void run_command(int command_id) {
             break;
         // Scroll the screen.
         case SCROLL_UP:
-            if (top_line_of_screen > 0) {
+            if (display_text_top > 0) {
                 cursor_y -= 1;
-                top_line_of_screen -= 1;
+                display_text_top -= 1;
             }
             break;
         case SCROLL_DOWN:
             cursor_y += 1;
-            top_line_of_screen += 1;
+            display_text_top += 1;
             break;
         case SCROLL_LEFT:
-            if (text_display_x_start > 0) {
+            if (display_text_x_start > 0) {
                 cursor_x -= 1;
-                text_display_x_start -= 1;
+                display_text_x_start -= 1;
             }
             break;
         case SCROLL_RIGHT:
             cursor_x += 1;
-            text_display_x_start += 1;
+            display_text_x_start += 1;
             break;
-        case SCROLL_PAGE_UP: // Move screen up by (screen_height-1).
-            top_line_of_screen -= screen_height-1;
-            cursor_y -= screen_height-1;
+        case SCROLL_PAGE_UP: // Move screen up by (display_text_height-1).
+            display_text_top -= display_text_height-1;
+            cursor_y -= display_text_height-1;
             break;
         case SCROLL_PAGE_DOWN:
-            top_line_of_screen += screen_height-1;
-            cursor_y += screen_height-1;
+            display_text_top += display_text_height-1;
+            cursor_y += display_text_height-1;
             break;
         case SEARCH:
             open_menu(&menu_search);
@@ -372,9 +370,7 @@ char help_pages[NUM_HELP_PAGES][MAX_HELP_PAGE_LEN] = {
     "start reading the code.\n"
     "\n"
     "In gred.h, there is a list of codes\n"
-    "the editor looks for called escape_sequences[][].\n"
     "Add your own escape code there AND in\n"
-    "escape_sequences_enum{} to add it.\n"
     "You can now check for that code in\n"
     "    run_escape_code()\n"
     "and have something happen when it finds it.\n"

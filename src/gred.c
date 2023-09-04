@@ -14,8 +14,6 @@ int command = 0; // current command
 char* menu_alert = 0;
 // Text input to the menu.
 struct line menu_input;
-int in_escape_sequence = 0;
-struct line cur_escape_sequence = {0, 0, ""};
 int previous_mode = COMMAND_MODE;
 int mode = COMMAND_MODE;
 int quit = 0;
@@ -31,14 +29,14 @@ int num_tab_spaces = 4;
 // Editor state information:
 int in_menu = 0;
 int menu_height = 2; // number of lines occupied by the menu
-int screen_height = 0;
-int total_screen_height = 0;
-int screen_width = 0;
-int top_line_of_screen = 0; // vertical scrolling
-int text_display_x_start = 0; // horizontal scrolling
-int text_display_x_end = 0; // last column of text to show
+int display_text_height = 0;
+int display_full_height = 0;
+int display_full_width = 0;
+int display_text_top = 0; // vertical scrolling
+int display_text_x_start = 0; // horizontal scrolling
+int display_text_x_end = 0; // last column of text to show
 int total_line_number_width = 0; // space occupied by the line number section
-int text_display_width = 0; // width of displayed lines
+int display_text_width = 0; // width of displayed lines
 int redraw_full_screen = 1; // whether to redraw the entire screen
 
 // Keep value within [min, max]
@@ -50,39 +48,39 @@ int bound_value(int v, int min, int max) {
 
 // keep the cursor in the grid, scrolling the screen if necessary
 void clip_cursor_to_grid() {
-    int bottom_line_of_screen = top_line_of_screen+screen_height-1;
+    int bottom_line_of_screen = display_text_top+display_text_height-1;
     //
     // horizontal adjustment
     //
     cursor_x = 
         bound_value(cursor_x, 0, (mode == INSERT_MODE) ? document[cursor_y].len : LINE_WIDTH);
-    text_display_x_start = 
-        bound_value(text_display_x_start, 0, LINE_WIDTH);
-    if (cursor_x < text_display_x_start) {
-        text_display_x_start = cursor_x;
+    display_text_x_start = 
+        bound_value(display_text_x_start, 0, LINE_WIDTH);
+    if (cursor_x < display_text_x_start) {
+        display_text_x_start = cursor_x;
     }
-    int last_screen_column = screen_width-total_line_number_width-1;
-    int column_cursor_delta = cursor_x - text_display_x_start;
+    int last_screen_column = display_full_width-total_line_number_width-1;
+    int column_cursor_delta = cursor_x - display_text_x_start;
     if (column_cursor_delta > last_screen_column) {
-        text_display_x_start = (cursor_x-last_screen_column);
+        display_text_x_start = (cursor_x-last_screen_column);
     }
-    text_display_x_end = text_display_x_start+screen_width-total_line_number_width;
-    text_display_width = screen_width-total_line_number_width; // width of text display area
+    display_text_x_end = display_text_x_start+display_full_width-total_line_number_width;
+    display_text_width = display_full_width-total_line_number_width; // width of text display area
     //
     // vertical adjustment
     //
     cursor_y = bound_value(cursor_y, 0, MAX_LINES-1);
     if (cursor_y > bottom_line_of_screen && 
         (bottom_line_of_screen <= MAX_LINES)) {
-        top_line_of_screen += (cursor_y - bottom_line_of_screen);
+        display_text_top += (cursor_y - bottom_line_of_screen);
     }
-    if (cursor_y < top_line_of_screen && top_line_of_screen > 0) {
-        top_line_of_screen -= (top_line_of_screen - cursor_y);
+    if (cursor_y < display_text_top && display_text_top > 0) {
+        display_text_top -= (display_text_top - cursor_y);
     }
-    if (top_line_of_screen < 0)
-        top_line_of_screen = 0;
+    if (display_text_top < 0)
+        display_text_top = 0;
     // if we scrolled the screen, redraw the whole thing
-    if (top_line_of_screen != old_top_line_of_screen)
+    if (display_text_top != display_text_top_old)
         redraw_full_screen = 1;
 }
 

@@ -233,6 +233,6 @@ void menu_search() {
         cursor_x = search_x;
         snprintf(match_info, MATCH_INFO_SIZE, "Match!");
         // Scroll the screen as far left as possible
-        text_display_x_start = 0;
+        display_text_x_start = 0;
     }
 }

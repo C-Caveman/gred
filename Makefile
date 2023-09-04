@@ -14,4 +14,9 @@ gred: ${SOURCES} src/gred.h Makefile
 	gcc ${SOURCES} -o gred
 
 install: gred
-	sudo cp gred /usr/bin/gred
+	# Put the binary in /usr/local/bin
+	sudo cp gred /usr/local/bin/gred
+	# Put gred_tutorial.txt in ~/.dotfiles/gred
+	mkdir -p ${HOME}/.dotfiles
+	mkdir -p ${HOME}/.dotfiles/gred
+	cp gred_tutorial.txt ${HOME}/.dotfiles/gred

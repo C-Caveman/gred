@@ -61,9 +61,11 @@ enum modes { // for escape codes
     NUM_MODES
 };
 
-// Document being edited:
 #define MAX_LINES 4096
+
+// Document being edited:
 extern struct line document[MAX_LINES];
+extern struct line file_name; // Name of current document.
 
 // Editor mode:
 extern int mode; // INSERT_MODE or COMMAND_MODE
@@ -76,19 +78,18 @@ extern int cursor_y;
 
 // Current command and input character:
 extern int command;
-extern struct line input; // Invocation of the command.
+extern struct line input; // Character(s) used to call the current command.
 extern char cur_char;
 extern char prev_char;
 
 // Screen data:
-extern struct line file_name; // Name of current file.
-extern int top_line_of_screen; // index of the top line displayed on the screen
-extern int old_top_line_of_screen; // Previous top line of document displayed.
-extern int text_display_x_start; // index of leftmost char displayed on the screen
-extern int text_display_x_end; // index of rightmost char displayed on the screen
-extern int total_screen_height; // terminal height (# of lines)
-extern int screen_height; // number of document lines that are displayed at once
-extern int screen_width; // number of document characters that fit on screen
+extern int display_text_top; // index of the top line displayed on the screen
+extern int display_text_top_old; // Previous top line of document displayed.
+extern int display_text_x_start; // index of leftmost char displayed on the screen
+extern int display_text_x_end; // index of rightmost char displayed on the screen
+extern int display_text_height; // number of document lines that are displayed at once
+extern int display_full_height; // terminal height (# of lines)
+extern int display_full_width; // number of document characters that fit on screen
 extern int redraw_full_screen; // flag for redrawing the full screen
 extern int total_line_number_width; // full width of the line numbers section, includes padding
 extern int menu_height; // how many lines tall the menu is
@@ -112,10 +113,6 @@ extern int colorize; // change color of keywords such as "int" and "return"
 extern int use_tabulators;
 extern int num_tab_spaces;
 extern int mode_specific_cursors_enabled; // whether the terminal supports bar/box cursor swapping
-
-// Escape sequences:
-extern int in_escape_sequence; // whether of not an escape sequence is being processed
-extern struct line cur_escape_sequence; // current escape code (omitting the initial "<escape>[")
 
 // Special state flags:
 extern int quit; // if exiting the editor or not
@@ -202,7 +199,6 @@ void update_settings_from_file_type(int file_type);
 //
 // Escape code processing:
 //
-int build_escape_sequence(char c);
 
 // track edits for undo/redo
 void undo();
