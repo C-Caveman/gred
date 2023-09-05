@@ -130,7 +130,7 @@ int search_line_backwards() {
     struct line* l = &document[search_y];
     int found_index = -1;
     int max_len = 0;
-    for (int i=search_x; i>-1; i--) {
+    for (int i=(search_x>l->len) ? l->len : search_x; i>-1; i--) {
         max_len = menu_input.len;//(i > l->len - menu_input.len) ? (l->len - menu_input.len) : menu_input.len;
         if (strncmp(&l->text[i], menu_input.text, max_len) == 0) {
             found_index = i;
@@ -204,8 +204,11 @@ void menu_search() {
     // Put cursor in the document.
     cursor_in_menu = 0;
     // Show the help info for this menu.
-    if (menu_was_just_opened == 1)
+    if (menu_was_just_opened == 1) {
         menu_alert = search_menu_help;
+        if (cursor_y > (MAX_LINES-find_num_empty_lines()-1))
+            cursor_y = MAX_LINES-find_num_empty_lines()-1;
+    }
     menu_was_just_opened = 0;
     int found_y = -1;
     search_x = cursor_x;

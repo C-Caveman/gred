@@ -2,19 +2,6 @@
 // Help info for using gred, the Grid-based text Editor
 #include "gred.h"
 
-// Variables from gred.c:
-extern struct line document[MAX_LINES];
-extern int cursor_x;
-extern int cursor_y;
-extern int display_text_top;
-extern int display_text_height;
-extern char* menu_alert;
-extern int show_line_numbers;
-extern int quit;
-extern int debug;
-extern int colorize;
-extern int display_redraw_all;
-
 // Tutorial information (used for switching to and from the tutorial).
 int in_tutorial = 0;
 struct line pre_tutorial_file_name;
@@ -38,18 +25,26 @@ struct binding {
     char input[MAX_BINDING_LEN];
     int command_id;
 };
+/* Shell script to print these bindings in tutorial format:
+sed -n '/Start of bindings./,/End of bindings./p' keybinds.c | 
+    sed 's/{"/</; s/",/>/; s/},//'
+*/
 static struct binding bindings[] = {
+    
+    // Editing:
     {"u", UNDO}, // undo
     {"r", REDO}, // redo
     {"i", SWITCH_TO_INSERT_MODE}, // insert mode
     {"I", SWITCH_TO_INSERT_MODE_AT_START_OF_LINE}, // goto start, insert
     {"a", SWITCH_TO_INSERT_MODE_AT_END_OF_LINE}, // goto end, insert
+    {"o", SWITCH_TO_INSERT_MODE_IN_NEW_LINE_BELOW}, // insert new line below
+    {"O", SWITCH_TO_INSERT_MODE_IN_NEW_LINE_ABOVE}, // insert new line above
     {"q", QUIT}, // quit
     {"x", QUIT}, // quit
     {"s", SAVE}, // save file
+    
+    // Navigation:
     {"/", SEARCH}, // search for word
-    {"o", SWITCH_TO_INSERT_MODE_IN_NEW_LINE_BELOW}, // insert new line below
-    {"O", SWITCH_TO_INSERT_MODE_IN_NEW_LINE_ABOVE}, // insert new line above
     {"k", UP}, // cursor movement
     {"j", DOWN},
     {"h", LEFT},
@@ -62,24 +57,31 @@ static struct binding bindings[] = {
     {"$", GOTO_LINE_END}, // goto end of line
     {"g", GOTO_DOCUMENT_TOP}, // goto top of document
     {"G", GOTO_DOCUMENT_BOTTOM}, // goto bottom of document
+    
+    // Settings:
     {"n", LINE_NUMBERS}, // toggle show_line_numbers
     {"D", DEBUG}, // debug input by printing the ascii value of your inputs
     {"m", MACRO}, // begin recording a macro
     {"?", HELP}, // show help info
-    //
-    // Escape codes start with '['
-    //
-    {"[A",      UP}, // arrow keys
+
+    // Arrow keys send multi-character "escape sequences" to the terminal.
+    {"[A",      UP},
     {"[B",      DOWN,},
     {"[D",      LEFT,},
     {"[C",      RIGHT,},
+    
+    // More keys that send multi-character "escape sequences" instead of a single byte.
     {"[3~",     DELETE}, // delete key
     {"[H",      GOTO_DOCUMENT_TOP, }, // home key
     {"[F",      GOTO_LINE_END,     }, // end key
     {"[5~",     SCROLL_PAGE_UP,    }, // page up key
     {"[6~",     SCROLL_PAGE_DOWN,  }, // page down key
+    
+    // Custom "escape sequences" only accessible by typing them.
     {"[secret", SECRET}, // secret
     {"[colors", COLORIZE}, // keyword color-coding
+    
+    // End of bindings.
     {0, 0} // Null terminator, ends the list.
 };
 // run a command from the commands enum in gred.h (can be from a keybind or an escape code)

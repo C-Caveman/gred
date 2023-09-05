@@ -6,7 +6,7 @@
 #include <sys/ioctl.h> // get terminal xy in draw_screen()
 #include <unistd.h>    // get terminal xy in draw_screen()
 #include <stdlib.h>    // system("clear") in draw_screen()
-#include <termios.h>   // terminal input in getch()
+#include <termios.h>   // instant terminal input in getch()
 #include "string.h"    // strnlen() in draw_screen()
 #include <ctype.h>     // isprint() in handle_input()
 
@@ -18,7 +18,7 @@ struct line {
     char text[LINE_WIDTH];
     // If you add another member, you must update the copy_line() function in gred.c!
 };
-enum line_flags { // properties a line can have
+enum line_flags { // properties a line of text can have
     CHANGED=  0b1,
     WRAPPED= 0b10,
 };
@@ -61,7 +61,7 @@ enum modes { // for escape codes
     NUM_MODES
 };
 
-#define MAX_LINES 4096
+#define MAX_LINES 4096 // Maximum document length allowed.
 
 // Document being edited:
 extern struct line document[MAX_LINES];
@@ -96,14 +96,14 @@ extern int display_line_number_width; // full width of the line numbers section,
 extern int menu_height; // how many lines tall the menu is
 
 // Menu:
-extern void (*menu)(); // pointer to a menu function
+extern void (*menu)(); // Pointer to a menu. Set this with open_menu().
 extern int cursor_in_menu; // If the cursor is in the menu.
-extern int menu_cursor_x;
-extern int reading_menu_input;
-extern int menu_was_just_opened;
+extern int menu_cursor_x; // Position of cursor when in the menu_input text box.
+extern int reading_menu_input; // If currently typing into menu_input.
+extern int menu_was_just_opened; // Set to 1 when open_menu() is called.
 extern struct line menu_input; // Text input to the current menu.
-extern char* menu_prompt;// Text displayed by the current menu.
-extern char* menu_alert; // Message that can be set anywhere, disapears next time a key is pressed.
+extern char* menu_prompt; // Prompt for the current menu. Displays info about the current mode when not in a menu.
+extern char* menu_alert;  // Temporary message. Dissapears upon the next screen refresh.
 #define MAX_MENU_PROMPT_WIDTH 16
 extern char insert_mode_help[]; // Menu text when in insert mode.
 extern char escape_mode_help[]; // Menu text when in escape mode.
