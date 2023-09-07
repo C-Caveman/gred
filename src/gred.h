@@ -228,6 +228,8 @@ int bound_value(int v, int min, int max); // clips value to [min, max]
 //
 enum COMMANDS_ENUM {
     NO_COMMAND,
+
+    // Navigation
     LEFT,
     RIGHT,
     UP,
@@ -243,15 +245,24 @@ enum COMMANDS_ENUM {
     SCROLL_PAGE_UP,
     SCROLL_PAGE_DOWN,
     SEARCH,
+    FIND_CHAR_NEXT,
+    FIND_CHAR_PREV,
+
+    //Editing
     UNDO,
     REDO,
     DELETE,
-    INSERT, //TODO rethink this <--------------------------------- TODO
+    INSERT,
     SWITCH_TO_INSERT_MODE,
     SWITCH_TO_INSERT_MODE_AT_START_OF_LINE,
     SWITCH_TO_INSERT_MODE_AT_END_OF_LINE,
     SWITCH_TO_INSERT_MODE_IN_NEW_LINE_BELOW,
     SWITCH_TO_INSERT_MODE_IN_NEW_LINE_ABOVE,
+    SELECT, // Begin selecting some text.
+    COPY, // Copy selected text. TODO add default behavior that copies the currend word.
+    PASTE,
+
+    //Settings
     LINE_NUMBERS,
     SECRET,
     COLORIZE,

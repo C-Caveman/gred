@@ -1,3 +1,7 @@
-Tutorial files.
+Delete word/line binding.
+
+Rewrite editing system.
+
+Copy/Paste
 
 Macros.

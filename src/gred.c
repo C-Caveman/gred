@@ -168,6 +168,12 @@ int main(int argc, char* argv[]) {
         // Get the next key that the user pressed.
         prev_char = cur_char;
         cur_char = getch();
+        // Stop debugging the input if escape was pressed twice.
+        if ((prev_char == ESCAPE) && (cur_char == ESCAPE))
+            debug = 0;
+        // Skip running commands if we are just displaying the keyboard input.
+        if (debug)
+            continue;
         // Exit from current menu if escape was double-tapped.
         double_escape_menu_exit();
         // Parse the input to determine the command.

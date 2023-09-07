@@ -32,7 +32,7 @@ extern int colorize;
 //
 // Keywords:
 //
-char c_operator_chars[] = 
+char c_operators[] = 
     "+-=(){}[]<>?!&|;*/:";
 char c_type_names[][MAX_KEYWORD_LEN] = {
     "int",
@@ -45,6 +45,7 @@ char c_type_names[][MAX_KEYWORD_LEN] = {
     "if",
     "else",
     "for",
+    "do",
     "while",
     "return",
     "void",
@@ -129,10 +130,10 @@ void display_line_highlighted(struct line* l, int start_index, int stop_index) {
         }
         while (
             i < stop_index && 
-            !is_operator(word.text[word.len-1], c_operator_chars) && // split if prev was operator
+            !is_operator(word.text[word.len-1], c_operators) && // split if prev was operator
             !isspace(word.text[word.len-1]) &&         // split if previous was space
             !isspace(l->text[i]) &&                    // split if space is next
-            !is_operator(l->text[i], c_operator_chars) // split if operator is next
+            !is_operator(l->text[i], c_operators) // split if operator is next
         );
         if (word.text[0] == '"') {
             do {
@@ -144,7 +145,7 @@ void display_line_highlighted(struct line* l, int start_index, int stop_index) {
         // Null terminate the word.
         word.text[word.len] = '\0';
         // Set the color based on which list the word is found in.
-        if (word.len == 1 && is_operator(word.text[0], c_operator_chars))
+        if (word.len == 1 && is_operator(word.text[0], c_operators))
             set_color(OPERATOR_COLOR);
         else if (in_list(&word, c_type_names))
             set_color(TYPE_COLOR);
@@ -169,7 +170,3 @@ void test_highlighting() {
     display_line_highlighted(&l, 0, l.len);
     printf("\n");
 }
-
-
-
-

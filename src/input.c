@@ -37,7 +37,7 @@ void switch_mode(int next_mode) {
 }
 // For when the user manually switches mode. Allows returning to insert mode after escape sequences.
 void remember_mode(int next_mode) {
-    previous_mode = mode;
+    previous_mode = next_mode;
 }
 
 void handle_insert_mode_newline(int column, int row) {

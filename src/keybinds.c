@@ -14,11 +14,6 @@ int tutorial_display_text_top = 0;
 
 char macro_msg[] = "Press <escape> twice to end the macro.";
 
-
-/////////////////////////////////////////////////////////////////////////////////
-// Commands! (enum is in gred.h)
-//
-
 // Key binds for commands.
 #define MAX_BINDING_LEN 16
 struct binding {
@@ -30,6 +25,7 @@ sed -n '/Start of bindings./,/End of bindings./p' keybinds.c |
     sed 's/{"/</; s/",/>/; s/},//'
 */
 static struct binding bindings[] = {
+    // Start of bindings:
     
     // Editing:
     {"u", UNDO}, // undo
@@ -226,10 +222,15 @@ void run_command(int command_id) {
         open_menu(&menu_save_file);
         break;
     case QUIT:
-        quit = 1; // Exit the program.
-        // Delete any temp files.
-        pclose(popen("rm /tmp/cur_document.txt", "r"));
-        break;
+        if (in_tutorial) {
+            command = HELP; // Close the tutorial.
+        }
+        else {
+            quit = 1; // Exit the program.
+            // Delete any temp files.
+            pclose(popen("rm /tmp/cur_document.txt", "r"));
+            break;
+        }
     // Help menu
     case HELP:
         if (!in_tutorial) {
@@ -282,6 +283,7 @@ void run_command(int command_id) {
     case DEBUG:
         system("clear");
         debug = ~debug;
+        display_redraw_all = 1;
         break;
     }
     clip_cursor_to_grid();
