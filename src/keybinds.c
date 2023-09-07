@@ -13,6 +13,8 @@ int pre_tutorial_display_text_top; // Screen position.
 int tutorial_display_text_top = 0;
 
 char macro_msg[] = "Press <escape> twice to end the macro.";
+char find_next_char_msg[] = "Finding next char...";
+char find_prev_char_msg[] = "Finding prev char...";
 
 // Key binds for commands.
 #define MAX_BINDING_LEN 16
@@ -30,6 +32,10 @@ static struct binding bindings[] = {
     // Editing:
     {"u", UNDO}, // undo
     {"r", REDO}, // redo
+    {"c", COPY}, // copy selected text TODO copy current word if no selection
+    {"v", PASTE}, // paste from clipboard
+    {"d", DELETE_WORD}, // delete current word TODO this
+    {"D", DELETE_LINE}, // delete the current line
     {"i", SWITCH_TO_INSERT_MODE}, // insert mode
     {"I", SWITCH_TO_INSERT_MODE_AT_START_OF_LINE}, // goto start, insert
     {"a", SWITCH_TO_INSERT_MODE_AT_END_OF_LINE}, // goto end, insert
@@ -41,6 +47,8 @@ static struct binding bindings[] = {
     
     // Navigation:
     {"/", SEARCH}, // search for word
+    {"f", FIND_CHAR_NEXT},
+    {"F", FIND_CHAR_PREV},
     {"k", UP}, // cursor movement
     {"j", DOWN},
     {"h", LEFT},
@@ -145,6 +153,24 @@ void run_command(int command_id) {
         break;
     case SEARCH:
         open_menu(&menu_search);
+        break;
+    case FIND_CHAR_NEXT:
+        char search_char = getch();
+        while (cursor_x < document[cursor_y].len) {
+            cursor_x += 1;
+            if (document[cursor_y].text[cursor_x] == search_char)
+                break;
+        }
+        menu_alert = find_next_char_msg;
+        break;
+    case FIND_CHAR_PREV:
+        char search_character = getch();
+        while (cursor_x > 0) {
+            cursor_x -= 1;
+            if (document[cursor_y].text[cursor_x] == search_character)
+                break;
+        }
+        menu_alert = find_prev_char_msg;
         break;
     //
     // EDITING:
