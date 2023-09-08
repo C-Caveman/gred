@@ -5,3 +5,5 @@ Delete word binding.
 Copy/Paste
 
 Macros.
+
+Clean up mode switching system.
