@@ -4,8 +4,9 @@
 
 // Previous values of settings.
 int old_show_line_numbers = 1;
-int display_text_top_old = 0; // vertical scroll distance
+int display_text_top_old = 0; // First visible document line on screen.
 int old_display_text_x_start = 0; // horizontal scroll distance
+int display_text_bottom = 0; // Last visible document line on screen.
 
 // set cursor position in terminal (where cursor is shown, and text from printf goes)
 void move_cursor(int x, int y) {
@@ -77,6 +78,7 @@ void draw_screen() {
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
     display_full_height = w.ws_row;
     display_text_height = w.ws_row-menu_height;
+    display_text_bottom = display_text_top + display_text_height-1;
     display_full_width = w.ws_col;
     // determine the width occupied by the line numbers
     int line_number_width = find_num_width(display_text_top+display_text_height);

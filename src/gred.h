@@ -83,6 +83,7 @@ extern struct binding bindings[];
 
 // Screen data:
 extern int display_text_top; // index of the top line displayed on the screen
+extern int display_text_bottom; // index of bottom document line on screen
 extern int display_text_top_old; // Previous top line of document displayed.
 extern int display_text_x_start; // index of leftmost char displayed on the screen
 extern int display_text_x_end; // index of rightmost char displayed on the screen
@@ -194,7 +195,7 @@ void run_command(int command_id);
 void run_escape_code(int escape_code_index);
 
 //
-// Menus:
+// Menus:            ::
 //
 // open a menu using a function pointer (uses "cur_char" and "command" for input)
 void open_menu(void (*cur_menu)());
@@ -211,6 +212,8 @@ void update_settings_from_file_type(int file_type);
 // move cursor to instance of cur_char on the current line
 void menu_find_char_next();
 void menu_find_char_prev();
+void menu_elevator_down();
+void menu_elevator_up();
 
 //
 // Escape code processing:
@@ -237,7 +240,7 @@ void doi(); // Print "DOI!!!" and quit.
 int bound_value(int v, int min, int max); // clips value to [min, max]
 
 //
-// Commands:
+// Commands:              ::
 //
 enum COMMANDS_ENUM {
     NO_COMMAND,
@@ -260,6 +263,8 @@ enum COMMANDS_ENUM {
     SEARCH,
     FIND_CHAR_NEXT,
     FIND_CHAR_PREV,
+    ELEVATOR_UP,
+    ELEVATOR_DOWN,
 
     //Editing
     UNDO,

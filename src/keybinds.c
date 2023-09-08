@@ -28,8 +28,10 @@ struct binding bindings[] = {
     
     // Navigation:
     {"/", SEARCH}, // search for word
-    {"f", FIND_CHAR_NEXT},
+    {"f", FIND_CHAR_NEXT}, // Find char horizontally.
     {"F", FIND_CHAR_PREV},
+    {"e", ELEVATOR_DOWN}, // Find char vertically.
+    {"E", ELEVATOR_UP},
     {"k", UP}, // cursor movement
     {"j", DOWN},
     {"h", LEFT},

@@ -80,11 +80,17 @@ void run_command(int command_id) {
     case SEARCH:
         open_menu(&menu_search);
         break;
-    case FIND_CHAR_NEXT:
+    case FIND_CHAR_NEXT: // Search for char left/right.
         open_menu(menu_find_char_next);
         break;
     case FIND_CHAR_PREV:
         open_menu(menu_find_char_prev);
+        break;
+    case ELEVATOR_UP: // Search for char up/down.
+        open_menu(menu_elevator_up);
+        break;
+    case ELEVATOR_DOWN:
+        open_menu(menu_elevator_down);
         break;
     //
     // Editing:

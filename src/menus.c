@@ -2,6 +2,9 @@
 // Menus such as the save_file() menu.
 #include "gred.h" 
 
+#define ALERT_SIZE 64 // Max size for menu_alert buffer.
+#define PROMPT_SIZE 64 // Max size for menu_prompt buffer.
+
 void (*menu)() = 0; // Pointer to the current menu function.
 int cursor_in_menu = 0;
 int reading_menu_input = 0;
@@ -107,9 +110,8 @@ void menu_save_file() {
     update_settings_from_file_type(get_file_type(&file_name));
 }
 
-#define FIND_PROMPT_SIZE 32
-char find_prompt[FIND_PROMPT_SIZE] = "Find a char.";
-char find_alert[FIND_PROMPT_SIZE];
+char find_prompt[PROMPT_SIZE] = "Find a char. <enter> for any char.";
+char find_alert[PROMPT_SIZE];
 // Find cur_char in the current line (forwards).
 void menu_find_char_next() {
     menu_prompt = find_prompt;
@@ -117,13 +119,19 @@ void menu_find_char_next() {
     if (cur_char == 0) // Ignore the command char. (it gets converted to null in open_menu())
         return;
     else
-        snprintf(find_alert, FIND_PROMPT_SIZE, "Finding \'%c\'", cur_char);
+        snprintf(find_alert, PROMPT_SIZE, "Finding \'%c\'", cur_char);
     menu_alert = find_alert;
     do {
         cursor_x += 1;
-        if (cursor_x >= LINE_WIDTH || document[cursor_y].text[cursor_x] == cur_char)
+        if (
+            cursor_x >= LINE_WIDTH ||
+            document[cursor_y].text[cursor_x] == cur_char ||
+            (cur_char == '\n' && !isspace(document[cursor_y].text[cursor_x]))
+           )
             break;
     } while (cursor_x < document[cursor_y].len);
+    if (cursor_x > document[cursor_y].len)
+        cursor_x = document[cursor_y].len;
     close_menu();
 }
 // Find cur_char in the current line (backwards).
@@ -133,13 +141,66 @@ void menu_find_char_prev() {
     if (cur_char == 0) // Ignore the command char. (it gets converted to null in open_menu())
         return;
     else
-        snprintf(find_alert, FIND_PROMPT_SIZE, "Finding \'%c\'", cur_char); 
+        snprintf(find_alert, PROMPT_SIZE, "Finding \'%c\'", cur_char); 
     menu_alert = find_alert;
     do {
         cursor_x -= 1;
-        if (cursor_x <= 0 || document[cursor_y].text[cursor_x] == cur_char)
+        if (
+            cursor_x <= 0 ||
+            document[cursor_y].text[cursor_x] == cur_char ||
+            (cur_char == '\n' && !isspace(document[cursor_y].text[cursor_x]))
+           )
             break;
     } while (cursor_x > 0);
+    if (cursor_x > document[cursor_y].len)
+        cursor_x = document[cursor_y].len;
+    close_menu();
+}
+char elevator_prompt[] = "Elevator to char. <enter> for any char.";
+char elevator_alert[ALERT_SIZE];
+// Find cur_char vertically.
+void menu_elevator_down() {
+    menu_prompt = elevator_prompt;
+    cursor_in_menu = 0;
+    if (cur_char == 0) // Menu was just opened (cur_char was set to null)
+        return;
+    // Take the elevator!
+    menu_alert = elevator_alert;
+    snprintf(elevator_alert, ALERT_SIZE, "Going down to \'%c\'", cur_char);
+    int last_line = MAX_LINES - find_num_empty_lines();
+    int initial_screen_bottom = display_text_bottom;
+    do {
+        cursor_y += 1;
+        if ( !(cursor_x > document[cursor_y].len) && 
+            (
+             (document[cursor_y].text[cursor_x] == cur_char) ||
+             (cur_char == '\n' && cursor_x < document[cursor_y].len) 
+            )
+           )
+            break;
+        
+    } while (cursor_y < last_line && cursor_y < initial_screen_bottom);
+    close_menu();
+}
+void menu_elevator_up() {
+    menu_prompt = elevator_prompt;
+    cursor_in_menu = 0;
+    if (cur_char == 0) // Menu was just opened (cur_char was set to null)
+        return;
+    // Take the elevator!
+    menu_alert = elevator_alert;
+    snprintf(elevator_alert, ALERT_SIZE, "Going up to \'%c\'", cur_char);
+    int initial_screen_top = display_text_top;
+    do {
+        cursor_y -= 1;
+        if ( !(cursor_x > document[cursor_y].len) &&
+            (
+              (document[cursor_y].text[cursor_x] == cur_char) ||
+              (cur_char == '\n' && !isspace(document[cursor_y].text[cursor_x]))
+            )
+           )
+            break;
+    } while (cursor_y > 0 && cursor_y > initial_screen_top);
     close_menu();
 }
 
