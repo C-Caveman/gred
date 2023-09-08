@@ -23,35 +23,23 @@ enum line_flags { // properties a line of text can have
     WRAPPED= 0b10,
 };
 
-// Information used to undo/redo changes to a document.
-struct edit {
-    // what operation was performed
-    int type;
-    // location of cursor before edit
-    int before_x, before_y;
-    // location of cursor after edit
-    int after_x, after_y;
-    // whether this is the start of a sequence of edits
-    int start_of_sequence;
-    // whether this is the end of a sequence of edits
-    int end_of_sequence;
-    // copy of the line before and after editing
-    struct line before; // document[before_y] before edit
-    struct line after;  // document[before_y] after edit
+//
+// Changes to the document are made using the functions in "editing.c"   ::
+//
+enum edit_types {
+    INSERT_CHAR, // Add a character at x,y.
+    DELETE_CHAR, // Remove a character at x,y.
+    INSERT_EMPTY_LINE, // Add a line at y.
+    DELETE_EMPTY_LINE, // Remove a line at y.
+    CURSOR_MOVE, // Move cursor to x,y. (used for tracking unusual cursor movement)
+    CHAIN_START, // Bookend a chain of multiple edits.
+    CHAIN_END,   //  (bookended edits are undone/redone as one)
+    MACRO_START,
+    MACRO_END,
 };
-enum edit_types { // used by the undo/redo system
-    BEFORE_EDIT,
-    EDIT_CHANGE_LINE,
-    EDIT_DELETE_LINE,
-    EDIT_INSERT_LINE,
-    EDIT_MOVE_CURSOR,
-    NUM_EDIT_TYPES
-};
-enum edit_sequence_types { // for linking multiple edits to be undone/redone at once
-    SINGLE_EDIT,
-    FIRST_OF_MULTIPLE_EDITS,
-    MIDDLE_OF_MULTIPLE_EDITS,
-    LAST_OF_MULTIPLE_EDITS
+enum edit_flags { // Used to mark edits as part of a CHAIN/MACRO.
+    IN_CHAIN =  0b1,
+    IN_MACRO =  0b01, // use this <---------- TODO
 };
 
 // The editor has 2 modes, insert mode for typing, and escape mode for everything else.
@@ -71,7 +59,9 @@ extern int in_tutorial;
 // Editor mode:
 extern int mode; // INSERT_MODE or COMMAND_MODE
 extern int previous_mode; // last mode used (used to revert the mode after an escape sequence)
-extern int recording_macro;
+extern int in_chain; // Whether recording a series of edits or not. Used by undo_redo.c
+extern int in_macro; // Whether recording a macro or not. Used by undo_redo.c
+extern struct line macro_buffer; // Characters recorded for a macro.
 
 // Cursor position in document:
 extern int cursor_x; // where we are in the document
@@ -82,6 +72,14 @@ extern int command;
 extern struct line input; // Character(s) used to call the current command.
 extern char cur_char;
 extern char prev_char;
+
+// Keybindings:
+#define MAX_BINDING_LEN 16
+struct binding {
+    char input[MAX_BINDING_LEN];
+    int command_id;
+};
+extern struct binding bindings[];
 
 // Screen data:
 extern int display_text_top; // index of the top line displayed on the screen
@@ -120,12 +118,15 @@ extern int quit; // if exiting the editor or not
 extern int debug; // if displaying input debug information or not (disables normal text)
 
 
-
-
-
+// ASCII values for various characters.   ::
 #define BACKSPACE 127
 #define ESCAPE 27
 #define CTRL_S 19
+
+
+//
+// Functions:        ::
+//
 
 //
 // Document display functions:
@@ -151,22 +152,31 @@ int check_vertical_bar_cursor_supported();
 void load_file(char* fname);
 // Handle a character input in INSERT_MODE
 void insert(char c);
-// copy line a's text and length into b
-void copy_line(struct line* a, struct line* b);
-// backspace on line l, return new cursor_x position
-int line_backspace(int cursor_x_pos, struct line* l);
-// remove an empty line from the document
-void delete_empty_line(int row);
-// insert on line l, return new cursor_x position
-int line_insert(char c, int cursor_x_pos, struct line* l);
-// move the current line into the previous line
-void merge_line_upwards(int row);
-// Insert a new empty line at the given row.
-void insert_new_empty_line(int row);
-// Get the # of lines after the last non-empty line.
-int find_num_empty_lines();
-// Copy given region of line b into given region of line a
-void line_copy_range(struct line* a, int a_first, int a_last,
+//
+// Make an edit to the document.    ::
+//
+void insert_char(char c, int x, int y);
+void delete_char(int x, int y);
+void insert_empty_line(int x, int y);
+void delete_empty_line(int x, int y);
+void cursor_move(int x, int y);
+void chain_start(int x, int y);
+void chain_end(int x, int y);
+void macro_start(int x, int y);
+void macro_end(int x, int y);
+//                          WARNING:
+// Edit a NON-DOCUMENT LINE (no undo/redo support for these)
+//
+int line_insert_char(char c, int cursor_x_pos, struct line* l);
+int line_delete_char(int cursor_x_pos, struct line* l);
+void line_clear(struct line* l);
+int add_line(int row);
+int delete_line(int row);
+void copy_line(struct line* a, struct line* b); // copy line a's text and length into b
+int line_insert(char c, int cursor_x_pos, struct line* l); // insert on line l, return new cursor_x position
+void merge_line_upwards(int row); // move the current line into the previous line
+int find_num_empty_lines(); // Get the # of lines after the last non-empty line.
+void line_copy_range(struct line* a, int a_first, int a_last, // Copy given region of line b into given region of line a
                      struct line* b, int b_first, int b_last);
 
 //
@@ -206,8 +216,8 @@ void update_settings_from_file_type(int file_type);
 // track edits for undo/redo
 void undo();
 void redo();
-void record_before_edit(int x, int y, int is_this_the_first_last_or_only_edit_in_this_sequence);
-void record_after_edit(int cursor_x, int cursor_y, int type_of_edit);
+void chain_start(int x, int y);
+void chain_end(int cursor_x, int cursor_y);
 void save_file(char* fname);
 
 // change state of editor
@@ -253,7 +263,7 @@ enum COMMANDS_ENUM {
     REDO,
     DELETE,
     DELETE_WORD,
-    DELETE_LINE,
+    DELETE_TRAILING,
     INSERT,
     SWITCH_TO_INSERT_MODE,
     SWITCH_TO_INSERT_MODE_AT_START_OF_LINE,

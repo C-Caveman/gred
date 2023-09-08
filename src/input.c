@@ -2,8 +2,6 @@
 // Handle input to the text editor.
 #include "gred.h"
 
-int recording_macro = 0;
-
 // Get a character immediately after it is pressed.
 // from: https://stackoverflow.com/questions/421860/capture-characters-from-standard-input-without-waiting-for-enter-to-be-pressed
 char getch() {
@@ -46,45 +44,37 @@ void handle_insert_mode_newline(int column, int row) {
     if (num_empty_lines <= 0 || row >= MAX_LINES-1) {
         return;
     }
-    int extra_line_len = document[row].len - (column);
+    chain_start(column, row);
     // make room for the new line
-    record_before_edit(column, row, FIRST_OF_MULTIPLE_EDITS);
-    insert_new_empty_line(row);
-    record_after_edit(0, row+1, EDIT_INSERT_LINE);
-    // put the end of the current line into the new line
-    record_before_edit(column, row, MIDDLE_OF_MULTIPLE_EDITS);
-    line_copy_range(&document[row],   0, LINE_WIDTH, 
-                    &document[row+1],     0, column);
-    document[row].len = column; // reduce the current line length
-    record_after_edit(column, row, EDIT_CHANGE_LINE);
-    // remove the start of the current line
-    record_before_edit(0, row+1, LAST_OF_MULTIPLE_EDITS);
-    line_copy_range(&document[row+1],     0,      LINE_WIDTH, 
-                    &document[row+1],     column, LINE_WIDTH);
-    document[row+1].len = extra_line_len;;
-    record_after_edit(0, row+1, EDIT_CHANGE_LINE);
-    cursor_y += 1;
+    insert_empty_line(cursor_x, row+1);
+    
+    // Move end of current line to the new line.
+    while (document[row].len > column) {
+        // Add last character of current line to the end of the next line.
+        insert_char(document[row].text[column], 
+                    document[row+1].len, 
+                    row+1);
+        delete_char(column, row); // Shorten tail of current line.
+    }
     cursor_x = 0;
+    cursor_y = row+1;
+    chain_end(cursor_x, cursor_y);
 }
 
-
+extern int num_undone; // Didn't want this in the header. Used to clear out the redo stack.
 // Process a keystroke from the user in INSERT_MODE.
 void insert(char c) {
     int line_len = document[cursor_y].len;
+    num_undone = 0; // Clear out the redo stack.
     if (c == BACKSPACE) {
         if (cursor_x == 0 && cursor_y > 0) { // merge current and previous lines
             merge_line_upwards(cursor_y);
         }
         else if (line_len > 0) {             // delete the character next to the cursor
-            record_before_edit(cursor_x, cursor_y, SINGLE_EDIT);
-            cursor_x = line_backspace(cursor_x, &document[cursor_y]);
-            record_after_edit(cursor_x, cursor_y, EDIT_CHANGE_LINE);
+            delete_char(cursor_x-1, cursor_y);
         }
         else if (line_len == 0 && cursor_y > 0) { // delete an empty line
-            record_before_edit(cursor_x, cursor_y, SINGLE_EDIT);
-            delete_empty_line(cursor_y);
-            cursor_y -= 1;
-            record_after_edit(cursor_x, cursor_y, EDIT_DELETE_LINE);
+            delete_empty_line(cursor_x, cursor_y);
         }
         return;
     }
@@ -93,20 +83,18 @@ void insert(char c) {
             handle_insert_mode_newline(cursor_x, cursor_y);
         }
         else if (isprint(c) && c != '\t') { // only insert printable characters!
-            record_before_edit(cursor_x, cursor_y, SINGLE_EDIT);
-            cursor_x = line_insert(c, cursor_x, &document[cursor_y]);
-            record_after_edit(cursor_x, cursor_y, EDIT_CHANGE_LINE);
+            insert_char(c, cursor_x, cursor_y);
         }
         else if (c == '\t') {
-            record_before_edit(cursor_x, cursor_y, SINGLE_EDIT);
+            chain_start(cursor_x, cursor_y);
             if (!use_tabulators) {
                 for (int i=0; i<num_tab_spaces; i++)
-                    cursor_x = line_insert(' ', cursor_x, &document[cursor_y]);
+                    insert_char(' ', cursor_x, cursor_y);
             }
             else {
-                cursor_x = line_insert('\t', cursor_x, &document[cursor_y]);
+                insert_char('\t', cursor_x, cursor_y);
             }         
-            record_after_edit(cursor_x, cursor_y, EDIT_CHANGE_LINE);
+            chain_end(cursor_x, cursor_y);
         }
     }
 }

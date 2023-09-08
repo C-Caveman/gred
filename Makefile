@@ -2,11 +2,11 @@
 SOURCES = \
 src/gred.c \
 src/keybinds.c \
+src/commands.c \
 src/debug_stuff.c \
 src/colorize.c \
 src/menus.c \
 src/file_types.c \
-src/undo_redo.c \
 src/editing.c src/input.c \
 src/screen.c
 

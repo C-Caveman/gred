@@ -68,7 +68,7 @@ int read_menu_input() {
         case ESCAPE:
             break;
         case BACKSPACE:
-            menu_cursor_x = line_backspace(menu_cursor_x, &menu_input);
+            menu_cursor_x = line_delete_char(menu_cursor_x, &menu_input);
             break;
         default:
             // Allow cursor movement.
@@ -78,7 +78,7 @@ int read_menu_input() {
                 menu_cursor_x += 1;
             // Insert text if not in an escape sequence.
             else if (input.text[0] != '[' && isprint(cur_char))
-                menu_cursor_x = line_insert(cur_char, menu_cursor_x, &menu_input);
+                menu_cursor_x = line_insert_char(cur_char, menu_cursor_x, &menu_input);
             break;
     }
     menu_cursor_x = bound_value(menu_cursor_x, 0, menu_input.len);
