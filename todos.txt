@@ -1,6 +1,6 @@
-Delete word/line binding.
+Fix 'F' and 'f' bindings to use the main loop input.
 
-Rewrite editing system.
+Delete word binding.
 
 Copy/Paste
 

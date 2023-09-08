@@ -143,9 +143,8 @@ void run_command(int command_id) {
     case SWITCH_TO_INSERT_MODE_IN_NEW_LINE_BELOW:
         // ugly hack: Cursor movement treated as an edit to preserve cursor position on undo.
         chain_start(cursor_x, cursor_y);
-        cursor_y += 1;
-        chain_start(cursor_x, cursor_y);
-        insert_empty_line(cursor_x, cursor_y);
+        insert_empty_line(cursor_x, cursor_y+1);
+        cursor_move(cursor_x, cursor_y-1);
         chain_end(cursor_x, cursor_y);
         switch_mode(INSERT_MODE);
         remember_mode(INSERT_MODE);
@@ -153,6 +152,7 @@ void run_command(int command_id) {
     case SWITCH_TO_INSERT_MODE_IN_NEW_LINE_ABOVE:
         chain_start(cursor_x, cursor_y);
         insert_empty_line(cursor_x, cursor_y);
+        cursor_move(cursor_x, cursor_y-1);
         chain_end(cursor_x, cursor_y);
         switch_mode(INSERT_MODE);
         remember_mode(INSERT_MODE);
