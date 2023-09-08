@@ -208,6 +208,9 @@ void menu_search();
 int get_file_type(struct line* fname);
 // Update settings such as use_tabulators for a given file type
 void update_settings_from_file_type(int file_type);
+// move cursor to instance of cur_char on the current line
+void menu_find_char_next();
+void menu_find_char_prev();
 
 //
 // Escape code processing:

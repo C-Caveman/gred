@@ -92,6 +92,7 @@ void menu_save_file() {
     // Put the file name into menu_input if it is empty.
     if (menu_was_just_opened) {
         copy_line(&menu_input, &file_name);
+        menu_input.text[menu_input.len] = 0; // null terminate
         menu_cursor_x = menu_input.len;
     }
     menu_was_just_opened = 0;
@@ -104,6 +105,42 @@ void menu_save_file() {
     file_name.len = menu_input.len;
     close_menu();
     update_settings_from_file_type(get_file_type(&file_name));
+}
+
+#define FIND_PROMPT_SIZE 32
+char find_prompt[FIND_PROMPT_SIZE] = "Find a char.";
+char find_alert[FIND_PROMPT_SIZE];
+// Find cur_char in the current line (forwards).
+void menu_find_char_next() {
+    menu_prompt = find_prompt;
+    cursor_in_menu = 0;
+    if (cur_char == 0) // Ignore the command char. (it gets converted to null in open_menu())
+        return;
+    else
+        snprintf(find_alert, FIND_PROMPT_SIZE, "Finding \'%c\'", cur_char);
+    menu_alert = find_alert;
+    do {
+        cursor_x += 1;
+        if (cursor_x >= LINE_WIDTH || document[cursor_y].text[cursor_x] == cur_char)
+            break;
+    } while (cursor_x < document[cursor_y].len);
+    close_menu();
+}
+// Find cur_char in the current line (backwards).
+void menu_find_char_prev() {
+    menu_prompt = find_prompt;
+    cursor_in_menu = 0;
+    if (cur_char == 0) // Ignore the command char. (it gets converted to null in open_menu())
+        return;
+    else
+        snprintf(find_alert, FIND_PROMPT_SIZE, "Finding \'%c\'", cur_char); 
+    menu_alert = find_alert;
+    do {
+        cursor_x -= 1;
+        if (cursor_x <= 0 || document[cursor_y].text[cursor_x] == cur_char)
+            break;
+    } while (cursor_x > 0);
+    close_menu();
 }
 
 // Search cursor
@@ -206,7 +243,7 @@ void menu_search() {
     // Show the help info for this menu.
     if (menu_was_just_opened == 1) {
         menu_alert = search_menu_help;
-        if (cursor_y > (MAX_LINES-find_num_empty_lines()-1))
+        if (cursor_y > (MAX_LINES-find_num_empty_lines()-1)) // Snap the cursor into the document.
             cursor_y = MAX_LINES-find_num_empty_lines()-1;
     }
     menu_was_just_opened = 0;

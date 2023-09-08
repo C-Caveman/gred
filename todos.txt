@@ -1,5 +1,3 @@
-Fix 'F' and 'f' bindings to use the main loop input.
-
 Delete word binding.
 
 Copy/Paste

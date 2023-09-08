@@ -163,7 +163,6 @@ int main(int argc, char* argv[]) {
     display_redraw_all = 1; // Redraw the screen.
     menu = 0;
     while (!quit) {
-        // Show the screen.
         draw_screen();
         // Get the next key that the user pressed.
         prev_char = cur_char;

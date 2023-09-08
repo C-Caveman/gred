@@ -13,8 +13,6 @@ int pre_tutorial_display_text_top; // Screen position.
 int tutorial_display_text_top = 0;
 
 char macro_msg[] = "Press <escape> twice to end the macro.";
-char find_next_char_msg[] = "Finding next char...";
-char find_prev_char_msg[] = "Finding prev char...";
 
 // run a command from the commands enum in gred.h (can be from a keybind or an escape code)
 void run_command(int command_id) {
@@ -83,22 +81,10 @@ void run_command(int command_id) {
         open_menu(&menu_search);
         break;
     case FIND_CHAR_NEXT:
-        char search_char = getch();
-        while (cursor_x < document[cursor_y].len) {
-            cursor_x += 1;
-            if (document[cursor_y].text[cursor_x] == search_char)
-                break;
-        }
-        menu_alert = find_next_char_msg;
+        open_menu(menu_find_char_next);
         break;
     case FIND_CHAR_PREV:
-        char search_character = getch();
-        while (cursor_x > 0) {
-            cursor_x -= 1;
-            if (document[cursor_y].text[cursor_x] == search_character)
-                break;
-        }
-        menu_alert = find_prev_char_msg;
+        open_menu(menu_find_char_prev);
         break;
     //
     // Editing:
