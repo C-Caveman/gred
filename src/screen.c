@@ -10,7 +10,14 @@ int display_text_bottom = 0; // Last visible document line on screen.
 
 // set cursor position in terminal (where cursor is shown, and text from printf goes)
 void move_cursor(int x, int y) {
-    x = bound_value(x, 0, display_full_width); // prevent shennanigans
+    // handle multi-byte unicode characters
+    int unicode_chars = 0;
+    for (int i=0; i<document[cursor_y].len; i++) {
+        if (document[cursor_y].text[i] & 0b10000000)
+            unicode_chars += 1;
+    }
+    x -= (unicode_chars > 0 && mode == INSERT_MODE) ? unicode_chars-1 : 0;
+    x = bound_value(x, 0, display_full_width); // keep cursor in the display space
     printf("\033[%d;%dH", y+1, x+1); // move cursor to x,y
 }
 

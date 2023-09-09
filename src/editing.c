@@ -77,7 +77,7 @@ void macro_end(int x, int y) {
 //
 // insert char c on line l, return new cursor_x position
 int line_insert_char(char c, int cursor_x_pos, struct line* l) {
-    if (c == '\n' || l->len > LINE_WIDTH-2 || !isprint(c)) // Skip invalid characters.
+    if (c == '\n' || l->len > LINE_WIDTH-2 || c == ESCAPE) // Skip invalid characters.
         return cursor_x_pos;
     for (int i=l->len; i>cursor_x_pos; i--) // Trailing letters move to the right.
         l->text[i] = l->text[i-1];

@@ -1,5 +1,7 @@
 Selections
 
+Update elevator to pass-through.
+
 Delete word binding.
 
 Copy/Paste

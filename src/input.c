@@ -26,11 +26,23 @@ char getch() {
 // swap between editing and running commands
 void switch_mode(int next_mode) {
     mode = next_mode;
+    int unicode_chars = 0;
     if (mode == COMMAND_MODE) {
         menu_prompt = escape_mode_help;
+        for (int i=0; i<document[cursor_y].len; i++) {
+            if (document[cursor_y].text[i] & 0b10000000)
+                unicode_chars += 1;
+        }
+        cursor_x -= (unicode_chars > 0) ? unicode_chars-1 : 0;
     }
     if (mode == INSERT_MODE) {
         menu_prompt = insert_mode_help;
+        // Adjust the cursor to deal with multi-byte unicode characters.
+        for (int i=0; i<document[cursor_y].len; i++) {
+            if (document[cursor_y].text[i] & 0b10000000)
+                unicode_chars += 1;
+        }
+        cursor_x += (unicode_chars > 0) ? unicode_chars-1 : 0;
     }
 }
 // For when the user manually switches mode. Allows returning to insert mode after escape sequences.
@@ -82,7 +94,7 @@ void insert(char c) {
         if (c == '\n') {
             handle_insert_mode_newline(cursor_x, cursor_y);
         }
-        else if (isprint(c) && c != '\t') { // only insert printable characters!
+        else if (c != ESCAPE && c != '\t') { // TODO more sanitization
             insert_char(c, cursor_x, cursor_y);
         }
         else if (c == '\t') {
