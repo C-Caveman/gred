@@ -39,8 +39,9 @@ int find_num_width(int num) {
 }
 
 void clear_line(int i) {
-    printf("\033[%d;0H", i+1);
-    printf("\r%*c\r", display_full_width, ' ');
+    printf("\033[%d;0H", i+1); // Go to line.
+    printf("\033[2K\r"); // Clear, return to left side of display.
+    //printf("\r%*c\r", display_full_width, ' ');
 }
 
 void draw_menu() {

@@ -41,7 +41,9 @@ struct binding bindings[] = {
     {"H", SCROLL_LEFT},
     {"L", SCROLL_RIGHT},
     {"0", GOTO_LINE_START}, // goto start of line
+    {";s", GOTO_LINE_START}, // goto start of line
     {"$", GOTO_LINE_END}, // goto end of line
+    {";e", GOTO_LINE_END}, // goto end of line
     {"g", GOTO_DOCUMENT_TOP}, // goto top of document
     {"G", GOTO_DOCUMENT_BOTTOM}, // goto bottom of document
     
@@ -50,6 +52,7 @@ struct binding bindings[] = {
     {"D", DEBUG}, // debug input by printing the ascii value of your inputs
     {"m", MACRO}, // begin recording a macro
     {"?", HELP}, // show help info
+    {";colors", COLORIZE}, // keyword color-coding
 
     // Arrow keys send multi-character "escape sequences" to the terminal.
     {"[A",      UP},
@@ -64,9 +67,8 @@ struct binding bindings[] = {
     {"[5~",     SCROLL_PAGE_UP,    }, // page up key
     {"[6~",     SCROLL_PAGE_DOWN,  }, // page down key
     
-    // Custom "escape sequences" only accessible by typing them.
-    {"[secret", SECRET}, // secret
-    {"[colors", COLORIZE}, // keyword color-coding
+    // Try it!
+    {";secret", SECRET}, // secret
     
     // End of bindings.
     {0, 0} // Null terminator, ends the list.
