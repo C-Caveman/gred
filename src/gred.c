@@ -20,7 +20,7 @@ int quit = 0;
 int debug = 0;
 
 // Editor settings:
-int show_line_numbers = 1;
+int show_line_numbers = 0;
 int colorize = 1;
 int mode_specific_cursors_enabled = 0; // If switching modes can change the cursor's appearance.
 int use_tabulators = 0;
@@ -144,7 +144,7 @@ void save_file(char* fname) {
     fclose(fp);
     
 }
-// DEBUG HACK <----------------------------------------- TODO remove
+
 char cur_char = '?';
 char prev_char = '?';
 int main(int argc, char* argv[]) {
@@ -162,6 +162,7 @@ int main(int argc, char* argv[]) {
     remember_mode(COMMAND_MODE);
     display_redraw_all = 1; // Redraw the screen.
     menu = 0;
+    signal(SIGINT, auto_scroll_interrupt); // Ctrl-c ends auto_scrolling.
     while (!quit) {
         draw_screen();
         // Get the next key that the user pressed.

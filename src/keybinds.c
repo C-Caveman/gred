@@ -15,15 +15,16 @@ struct binding bindings[] = {
     {"r", REDO}, // redo
     {"c", COPY}, // copy selected text TODO copy current word if no selection
     {"v", PASTE}, // paste from clipboard
-    {"d", DELETE_WORD}, // delete current word TODO this
-    {"D", DELETE_TRAILING}, // delete the current line
+    {"d", DELETE}, // delete current char
+    //{"d", DELETE_WORD}, // delete current word TODO this
+    {"X", DELETE_TRAILING}, // delete from cursor_x to end of line
+    {"x", DELETE_LINE}, // delete the current line
     {"i", SWITCH_TO_INSERT_MODE}, // insert mode
     {"I", SWITCH_TO_INSERT_MODE_AT_START_OF_LINE}, // goto start, insert
     {"a", SWITCH_TO_INSERT_MODE_AT_END_OF_LINE}, // goto end, insert
     {"o", SWITCH_TO_INSERT_MODE_IN_NEW_LINE_BELOW}, // insert new line below
     {"O", SWITCH_TO_INSERT_MODE_IN_NEW_LINE_ABOVE}, // insert new line above
     {"q", QUIT}, // quit
-    {"x", QUIT}, // quit
     {"s", SAVE}, // save file
     
     // Navigation:
@@ -40,6 +41,10 @@ struct binding bindings[] = {
     {"J", SCROLL_DOWN},
     {"H", SCROLL_LEFT},
     {"L", SCROLL_RIGHT},
+    {";j", SCROLL_DOWN_AUTO_FAST}, // scroll automatically
+    {";k", SCROLL_UP_AUTO_FAST}, // scroll automatically
+    {";J", SCROLL_DOWN_AUTO_SLOW}, // scroll automatically
+    {";K", SCROLL_UP_AUTO_SLOW}, // scroll automatically
     {"0", GOTO_LINE_START}, // goto start of line
     {";s", GOTO_LINE_START}, // goto start of line
     {"$", GOTO_LINE_END}, // goto end of line

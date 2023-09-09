@@ -2,25 +2,35 @@
 // Handle input to the text editor.
 #include "gred.h"
 
+struct termios old = {0};
+
+// Listen for a character.
+void listen_start() {
+    if (tcgetattr(0, &old) < 0)
+            perror("tcsetattr()");
+    old.c_lflag &= ~ICANON;
+    old.c_lflag &= ~ECHO;
+    old.c_cc[VMIN] = 1;
+    old.c_cc[VTIME] = 0;
+    if (tcsetattr(0, TCSANOW, &old) < 0)
+        perror("tcsetattr ICANON");
+}
+// Stop listening for a character.
+void listen_end() {
+    old.c_lflag |= ICANON;
+    old.c_lflag |= ECHO;
+    if (tcsetattr(0, TCSADRAIN, &old) < 0)
+        perror ("tcsetattr ~ICANON");
+}
+
 // Get a character immediately after it is pressed.
 // from: https://stackoverflow.com/questions/421860/capture-characters-from-standard-input-without-waiting-for-enter-to-be-pressed
 char getch() {
-        char c = '?';
-        struct termios old = {0};
-        if (tcgetattr(0, &old) < 0)
-                perror("tcsetattr()");
-        old.c_lflag &= ~ICANON;
-        old.c_lflag &= ~ECHO;
-        old.c_cc[VMIN] = 1;
-        old.c_cc[VTIME] = 0;
-        if (tcsetattr(0, TCSANOW, &old) < 0)
-                perror("tcsetattr ICANON");
-        c = fgetc(stdin);
-        old.c_lflag |= ICANON;
-        old.c_lflag |= ECHO;
-        if (tcsetattr(0, TCSADRAIN, &old) < 0)
-                perror ("tcsetattr ~ICANON");
-        return (c);
+    char c = '?';
+    listen_start();
+    c = fgetc(stdin);
+    listen_end();
+    return (c);
 }
 
 // swap between editing and running commands

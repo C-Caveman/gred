@@ -59,6 +59,22 @@ void run_command(int command_id) {
         cursor_y += 1;
         display_text_top += 1;
         break;
+    case SCROLL_UP_AUTO_SLOW:
+        auto_scroll_delay = 400000; // uSec between scrolls
+        open_menu(menu_scroll_up_auto);
+        break;
+    case SCROLL_DOWN_AUTO_SLOW:
+        auto_scroll_delay = 400000; // uSec between scrolls
+        open_menu(menu_scroll_down_auto);
+        break;
+    case SCROLL_UP_AUTO_FAST:
+        auto_scroll_delay = 100000; // uSec between scrolls
+        open_menu(menu_scroll_up_auto);
+        break;
+    case SCROLL_DOWN_AUTO_FAST:
+        auto_scroll_delay = 100000; // uSec between scrolls
+        open_menu(menu_scroll_down_auto);
+        break;
     case SCROLL_LEFT:
         if (display_text_x_start > 0) {
             cursor_x -= 1;
@@ -103,10 +119,19 @@ void run_command(int command_id) {
         break;
     case DELETE:
         chain_start(cursor_x, cursor_y);
-        delete_char(cursor_x+1, cursor_y);
+        delete_char(cursor_x, cursor_y);
         chain_end(cursor_x, cursor_y);
         break;
     case DELETE_WORD: // TODO this <-------------------------------------- TODO
+        break;
+    case DELETE_LINE:
+        chain_start(cursor_x, cursor_y);
+        while(document[cursor_y].len > 0) {
+            delete_char(0, cursor_y);
+        }
+        delete_empty_line(cursor_x, cursor_y);
+        cursor_y += 1;
+        chain_end(cursor_x, cursor_y);
         break;
     case DELETE_TRAILING:
         chain_start(cursor_x, cursor_y);

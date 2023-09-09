@@ -9,6 +9,7 @@
 #include <termios.h>   // instant terminal input in getch()
 #include "string.h"    // strnlen() in draw_screen()
 #include <ctype.h>     // isprint() in handle_input()
+#include <signal.h>    // Catch ctrl-c when auto_scrolling
 
 // Lines of text that make up a document.
 #define LINE_WIDTH 256
@@ -62,6 +63,8 @@ extern int previous_mode; // last mode used (used to revert the mode after an es
 extern int in_chain; // Whether recording a series of edits or not. Used by undo_redo.c
 extern int in_macro; // Whether recording a macro or not. Used by undo_redo.c
 extern struct line macro_buffer; // Characters recorded for a macro.
+extern int auto_scrolling; // Whether scrolling automatically or not.
+extern int auto_scroll_delay; // Time in uSec between scrolls.
 
 // Cursor position in document:
 extern int cursor_x; // where we are in the document
@@ -193,12 +196,14 @@ int get_command(char c);
 void run_command(int command_id);
 // perform an operation for a given escape code
 void run_escape_code(int escape_code_index);
+void auto_scroll_interrupt(); // Stop auto_scrolling upon ctrl-c.
 
 //
 // Menus:            ::
 //
 // open a menu using a function pointer (uses "cur_char" and "command" for input)
 void open_menu(void (*cur_menu)());
+void close_menu(); // Closes the current menu.
 // Exit current menu if escape was double-tapped.
 void double_escape_menu_exit();
 // save_file menu
@@ -209,11 +214,15 @@ void menu_search();
 int get_file_type(struct line* fname);
 // Update settings such as use_tabulators for a given file type
 void update_settings_from_file_type(int file_type);
-// move cursor to instance of cur_char on the current line
+// Move cursor to instance of cur_char on the current line.
 void menu_find_char_next();
 void menu_find_char_prev();
+// Move cursor up/down until reaching a non-whitespace character.
 void menu_elevator_down();
 void menu_elevator_up();
+// Automatically scroll the screen.
+void menu_scroll_down_auto();
+void menu_scroll_up_auto();
 
 //
 // Escape code processing:
@@ -258,6 +267,11 @@ enum COMMANDS_ENUM {
     SCROLL_DOWN,
     SCROLL_LEFT,
     SCROLL_RIGHT,
+    SCROLL_UP_AUTO_SLOW,
+    SCROLL_DOWN_AUTO_SLOW,
+    SCROLL_UP_AUTO_FAST,
+    SCROLL_DOWN_AUTO_FAST,
+
     SCROLL_PAGE_UP,
     SCROLL_PAGE_DOWN,
     SEARCH,
@@ -271,6 +285,7 @@ enum COMMANDS_ENUM {
     REDO,
     DELETE,
     DELETE_WORD,
+    DELETE_LINE,
     DELETE_TRAILING,
     INSERT,
     SWITCH_TO_INSERT_MODE,

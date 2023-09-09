@@ -2,8 +2,25 @@
 // Menus such as the save_file() menu.
 #include "gred.h" 
 
+int auto_scroll_delay = 400000;
+void auto_scroll_interrupt() {
+    close_menu();
+    document[cursor_y].flags |= CHANGED; // paint over the ^C
+    if (auto_scrolling) {
+        auto_scrolling = 0;
+    }
+    else {
+        system("clear");
+        exit(0);
+    }
+}
+
 #define ALERT_SIZE 64 // Max size for menu_alert buffer.
 #define PROMPT_SIZE 64 // Max size for menu_prompt buffer.
+char alert_buffer[ALERT_SIZE]; // String written to by the alert() function.
+char prompt_buffer[PROMPT_SIZE];
+
+int auto_scrolling = 0;
 
 void (*menu)() = 0; // Pointer to the current menu function.
 int cursor_in_menu = 0;
@@ -50,13 +67,23 @@ void close_menu() {
     menu_was_just_opened = 0;
 }
 
+// Put an alert message on the screen.
+void alert(char* msg) {
+    menu_alert = alert_buffer;
+    snprintf(alert_buffer, ALERT_SIZE, "%s", msg);
+}
+// Put a prompt message on the screen.
+void prompt(char* msg) {
+    menu_prompt = prompt_buffer;
+    snprintf(prompt_buffer, PROMPT_SIZE, "%s", msg);
+}
+
 // Exit menu if escape was just pressed twice.
-char menu_exit_prompt[] = "Press <escape> again to exit the menu.";
 void double_escape_menu_exit() {
     if (cur_char == ESCAPE && prev_char == ESCAPE)
         close_menu();
     else if (cur_char == ESCAPE && menu != 0) // Only show this if in a menu.
-        menu_alert = menu_exit_prompt;
+        alert("Press <escape> again to exit the menu.");
 }
 
 // Return 1 if still reading input, return 0 when finished.
@@ -89,9 +116,8 @@ int read_menu_input() {
 }
 
 // menu for saving to a file
-char save_menu_prompt[] = "Save as: ";
 void menu_save_file() {
-    menu_prompt = save_menu_prompt;
+    prompt("Save as: ");
     // Put the file name into menu_input if it is empty.
     if (menu_was_just_opened) {
         copy_line(&menu_input, &file_name);
@@ -110,17 +136,14 @@ void menu_save_file() {
     update_settings_from_file_type(get_file_type(&file_name));
 }
 
-char find_prompt[PROMPT_SIZE] = "Find a char. <enter> for any char.";
-char find_alert[PROMPT_SIZE];
 // Find cur_char in the current line (forwards).
 void menu_find_char_next() {
-    menu_prompt = find_prompt;
+    prompt("Find a char forwards.");
     cursor_in_menu = 0;
     if (cur_char == 0) // Ignore the command char. (it gets converted to null in open_menu())
         return;
     else
-        snprintf(find_alert, PROMPT_SIZE, "Finding \'%c\'", cur_char);
-    menu_alert = find_alert;
+        alert("Finding next char...");
     do {
         cursor_x += 1;
         if (
@@ -136,13 +159,12 @@ void menu_find_char_next() {
 }
 // Find cur_char in the current line (backwards).
 void menu_find_char_prev() {
-    menu_prompt = find_prompt;
+    prompt("Find a char backwards.");
     cursor_in_menu = 0;
     if (cur_char == 0) // Ignore the command char. (it gets converted to null in open_menu())
         return;
     else
-        snprintf(find_alert, PROMPT_SIZE, "Finding \'%c\'", cur_char); 
-    menu_alert = find_alert;
+        alert("Finding prev char...");
     do {
         cursor_x -= 1;
         if (
@@ -156,53 +178,69 @@ void menu_find_char_prev() {
         cursor_x = document[cursor_y].len;
     close_menu();
 }
-char elevator_prompt[] = "Elevator to char. <enter> for any char.";
-char elevator_alert[ALERT_SIZE];
 // Find cur_char vertically.
 void menu_elevator_down() {
-    menu_prompt = elevator_prompt;
     cursor_in_menu = 0;
-    if (cur_char == 0) // Menu was just opened (cur_char was set to null)
-        return;
-    // Take the elevator!
-    menu_alert = elevator_alert;
-    snprintf(elevator_alert, ALERT_SIZE, "Going down to \'%c\'", cur_char);
+    alert("Elevator down...");
     int last_line = MAX_LINES - find_num_empty_lines();
-    int initial_screen_bottom = display_text_bottom;
+    int initial_screen_bottom = last_line;//display_text_bottom;
     do {
         cursor_y += 1;
-        if ( !(cursor_x > document[cursor_y].len) && 
-            (
-             (document[cursor_y].text[cursor_x] == cur_char) ||
-             (cur_char == '\n' && cursor_x < document[cursor_y].len) 
-            )
-           )
+        if (!isspace(document[cursor_y].text[cursor_x]) && cursor_x < document[cursor_y].len)
             break;
         
     } while (cursor_y < last_line && cursor_y < initial_screen_bottom);
     close_menu();
 }
 void menu_elevator_up() {
-    menu_prompt = elevator_prompt;
     cursor_in_menu = 0;
-    if (cur_char == 0) // Menu was just opened (cur_char was set to null)
-        return;
-    // Take the elevator!
-    menu_alert = elevator_alert;
-    snprintf(elevator_alert, ALERT_SIZE, "Going up to \'%c\'", cur_char);
-    int initial_screen_top = display_text_top;
+    alert("Elevator up...");
+    int initial_screen_top = 0;//display_text_top;
     do {
         cursor_y -= 1;
-        if ( !(cursor_x > document[cursor_y].len) &&
-            (
-              (document[cursor_y].text[cursor_x] == cur_char) ||
-              (cur_char == '\n' && !isspace(document[cursor_y].text[cursor_x]))
-            )
-           )
+        if (!isspace(document[cursor_y].text[cursor_x]) && cursor_x < document[cursor_y].len)
             break;
     } while (cursor_y > 0 && cursor_y > initial_screen_top);
     close_menu();
 }
+// Automatically scroll the screen.
+void menu_scroll_down_auto() {
+    auto_scrolling = 1;
+    cursor_in_menu = 0;
+    if (cur_char == ESCAPE) {
+        close_menu();
+        auto_scrolling = 0;
+        return;
+    }
+    while (auto_scrolling) {
+        alert("Auto scrolling down. <ctrl-c> to cancel");
+        cursor_y += 1;
+        display_text_top += 1;
+        display_redraw_all = 1;
+        draw_screen();
+        fflush(stdout);
+        usleep(auto_scroll_delay);
+    }
+}
+void menu_scroll_up_auto() {
+    auto_scrolling = 1;
+    cursor_in_menu = 0;
+    if (cur_char == ESCAPE) {
+        close_menu();
+        auto_scrolling = 0;
+        return;
+    }
+    while (auto_scrolling) {
+        alert("Auto scrolling up. <ctrl-c> to cancel");
+        cursor_y -= 1;
+        display_text_top -= 1;
+        display_redraw_all = 1;
+        draw_screen();
+        fflush(stdout);
+        usleep(auto_scroll_delay);
+    }
+}
+
 
 // Search cursor
 int search_x = 0;
@@ -292,18 +330,18 @@ char search_menu_prompt_2[] = "Finding: ";
 char search_menu_help[] = "Search UP or DOWN (k/j)";
 void menu_search() {
     // Set the prompt.
-    menu_prompt = search_menu_prompt;
+    prompt("Find: ");
     // Get the search pattern before we enter the menu.
     read_menu_input();
     if (reading_menu_input)
         return;
     // Indicate that menu_input is done reading.
-    menu_prompt = search_menu_prompt_2;
+    prompt("Finding: ");
     // Put cursor in the document.
     cursor_in_menu = 0;
     // Show the help info for this menu.
     if (menu_was_just_opened == 1) {
-        menu_alert = search_menu_help;
+        alert("Search: UP/DOWN k/j");
         if (cursor_y > (MAX_LINES-find_num_empty_lines()-1)) // Snap the cursor into the document.
             cursor_y = MAX_LINES-find_num_empty_lines()-1;
     }
@@ -332,7 +370,6 @@ void menu_search() {
     if (found_y != -1) {
         cursor_y = search_y;
         cursor_x = search_x;
-        snprintf(match_info, MATCH_INFO_SIZE, "Match!");
         // Scroll the screen as far left as possible
         display_text_x_start = 0;
     }
