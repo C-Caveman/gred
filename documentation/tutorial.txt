@@ -66,3 +66,27 @@ Commands:
 
     <;k> move screen up automatically
     <;K>     (slow mode)
+
+
+-----------------------------------------------
+:: Editing:
+-----------
+
+Commands:
+    <I>  insert after moving to start of line
+    <a>  insert after moving to end of line
+    <o>  insert after making new line below and moving to it
+    <O>  insert after making new line above and moving to it
+    
+    <x>  delete a line
+    <X>  delete the rest of a line (after the cursor)
+
+
+---------------------------------------------
+:: Settings:
+------------
+
+Commands:
+    <n>  line numbers (enable/disable)
+
+    <;colors> colors (enable/disable)
