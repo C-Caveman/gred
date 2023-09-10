@@ -7,7 +7,8 @@ src/debug_stuff.c \
 src/colorize.c \
 src/menus.c \
 src/file_types.c \
-src/editing.c src/input.c \
+src/editing.c \
+src/input.c \
 src/screen.c
 
 gred: ${SOURCES} src/gred.h Makefile

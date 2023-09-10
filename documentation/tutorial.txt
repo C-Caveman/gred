@@ -18,10 +18,10 @@ Scroll the screen:
 :: Editing basics:
 ------------------
 
-Insert text:
+Insert text:           (go ahead and write stuff here, it won't be saved)
     <i>
 
-Stop inserting text: 
+Stop inserting: 
     <escape>
 
 Commands:      (usable when not inserting text)
@@ -90,3 +90,48 @@ Commands:
     <n>  line numbers (enable/disable)
 
     <;colors> colors (enable/disable)
+
+
+
+================================================
+:: Tinkering:
+=============
+
+---------------------------------------
+:: If you want to change a key binding:
+    
+    src/keybinds.c has the key binds list.
+    
+    Add your binding to the list.
+
+    Compile and install with 'sudo make install' (make sure you are in the directory with the Makefile).
+
+-------------------------------
+:: If you want to add a command:
+
+    src/gred.h has a commands list. (skip to it by searching for "::")
+
+    Add the name you want to use for the command to the enum.
+
+    src/commands.c has a run_command() function.
+
+    Add a case for your new command. (don't forget to put a "break" at the end!)
+
+    Add a key binding for using that command. (the list is in src/keybinds.c)
+
+    Compile and install with 'sudo make install' (make sure you are in the directory with the Makefile).
+
+
+-----------------------------
+:: If you want to add a menu:
+
+    src/gred.h has a list of all the menus.
+
+    Add your menu's function prototype there: void my_menu();
+    Don't give it arguments, as the 'menu' pointer is a function pointer with no args.
+
+    src/menus.c has all the menu functions.
+
+    Write your menu there. You will find plenty examples of how to make a menu there.
+
+    Compile and install with 'sudo make install' (make sure you are in the directory with the Makefile)

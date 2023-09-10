@@ -1,6 +1,6 @@
 Selections
 
-Update elevator to pass-through.
+Utf-8 multi-byte character support.
 
 Delete word binding.
 
