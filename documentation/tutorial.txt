@@ -1,0 +1,68 @@
+---------------------------------
+:: Tutorial:
+------------
+
+Move the cursor:
+
+   <k>         ↑  
+<h> · <l>    ← · →    Arrow keys also work.
+   <j>         ↓
+
+Scroll the screen:
+  
+   <K>         ↑  
+<H> · <L>    ← · →
+   <J>         ↓
+
+---------------------------------------------
+:: Editing basics:
+------------------
+
+Insert text:
+    <i>
+
+Stop inserting text: 
+    <escape>
+
+Commands:      (usable when not inserting text)
+    <s>  save
+    <q>  quit
+    <u>  undo
+    <r>  redo    
+
+    <h>  move the cursor (yes, these are commands)
+    <j>
+    <k>
+    <l>
+
+    <H>  move the screen (these are also commands)
+    <J>
+    <K>
+    <L>
+
+
+
+----------------------------------
+:: Navigation:
+---------------------------
+
+Commands:
+    </>  search    (find a word in the document)
+
+    <e>  elevator down    (go down until reaching a letter)
+    <E>  elevator up
+
+    <;s> start of line
+    <0>  (same as above)
+
+    <;e>  end of line
+    <$>
+
+    <g>  go to first line
+    <G>  go to last line
+
+    <;j> move screen down automatically
+    <;J>     (slow mode)
+
+    <;k> move screen up automatically
+    <;K>     (slow mode)

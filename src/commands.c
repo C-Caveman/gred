@@ -234,7 +234,7 @@ void run_command(int command_id) {
                         TUT_FNAME_BUFFER_SIZE, 
                         "%s%s", 
                         getenv("HOME"),
-                        "/.dotfiles/gred/gred_tutorial.txt");
+                        "/.dotfiles/gred/tutorial.txt");
             load_file(tut_fname_buffer);
             // Change the file_name to prevent overwriting the tutorial or the document.
             strncpy(file_name.text, "tutorial.txt", LINE_WIDTH);

@@ -129,6 +129,10 @@ void load_file(char* fname) {
 
 void save_file(char* fname) {
     FILE* fp = fopen(fname ,"w");
+    if (fp == 0) {
+        alert("Save failed!");
+        return;
+    }
     // remove empty lines in the document
     int num_empty_lines = 0;
     for (int line_number=MAX_LINES-1; line_number>0; line_number--) {

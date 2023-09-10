@@ -1,0 +1,71 @@
+Documentation for the undo/redo system in editing.c
+
+o----------------o
+| :: Basic idea: |
+o----------------o
+
+Every edit to the document is done one character at a time.
+
+The info about each edit is stored (in a "struct edit").
+
+With this info, the edit can be undone by performing the opposite of the edit.
+
+
+o------------------------o
+| :: Anatomy of an edit: |
+o------------------------o
+
+ char   char    char       char  int
+[type] [flags] [contents] [x]   [y]
+
+
+type:
+    INSERT_CHAR
+    DELETE_CHAR
+    INSERT_LINE
+    DELETE_LINE
+    CURSOR_MOVE
+    SEQUENCE_END
+    SEQUENCE_START
+
+flags:
+    in_chain
+
+contents:
+    The character to insert.
+
+x:
+    Index of character the edit is on.
+
+y:
+    Index of line the edit is on.
+
+
+o---------------------o
+| :: Usage:           |
+o---------------------o
+
+Example single-character edit:
+    insert_char('A', cursor_x, cursor_y); // Puts 'A' in the document at x,y
+
+Example multi-character edit:
+    // Delete line:
+    chain_start(); // Bookend the chain of edits in the undo stack.
+    while (document[cursor_y].len > 0)
+        delete_char(cursor_x, cursor_y); // These edits have in_sequence set to 1.
+    delete_line(cursor_x, cursor_y);
+    chain_end(); // Bookend the chain of edits in the undo stack.
+
+
+Helper functions:
+    // Create a bookend for a string of multiple undos/redos. Set in_edit_sequence to 1.
+    edit_sequence_start()
+
+    // Create a bookend for a string of multiple undos/redos. Set in_edit_sequence to 0.
+    edit_sequence_end()
+
+Further implementation details:
+    Functions that make edits (edit_insert_char(), edit_delete_char(), ect.)
+    must store the edit with the appropriate flags.
+    
+    If the global variable in_edit_sequence is 1, the edit must be stored with in_sequence=1.

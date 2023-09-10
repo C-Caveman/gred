@@ -53,7 +53,9 @@ int get_file_type(struct line* fname) {
         }
         i += 1;
     }
+/*
     snprintf(suffix_message, MAX_SUFFIX_MESSAGE_LEN, "File type: \"%.*s\"", MAX_SUFFIX_LEN, suffix.text);
     menu_alert = suffix_message;
+*/
     return ftype;
 }

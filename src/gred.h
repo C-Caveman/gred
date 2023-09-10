@@ -204,6 +204,7 @@ void auto_scroll_interrupt(); // Stop auto_scrolling upon ctrl-c.
 // open a menu using a function pointer (uses "cur_char" and "command" for input)
 void open_menu(void (*cur_menu)());
 void close_menu(); // Closes the current menu.
+void alert(); // Print a temporary message in the menu.
 // Exit current menu if escape was double-tapped.
 void double_escape_menu_exit();
 // save_file menu
