@@ -1,3 +1,5 @@
+Cut editing.c in half. (lots of repeating code to condense)
+
 Selections
 
 Utf-8 multi-byte character support.
