@@ -15,12 +15,11 @@ gred: ${SOURCES} src/gred.h Makefile
 	gcc ${SOURCES} -o gred
 
 install: gred
-	# Put the binary in /usr/local/bin
-	sudo cp gred /usr/local/bin/gred
-	# Put tutorial.txt in ~/.dotfiles/gred
-	mkdir -p ${HOME}/.dotfiles
+	sudo cp gred /usr/local/bin/gred     # Put the binary in /usr/local/bin            #
+	
+	mkdir -p ${HOME}/.dotfiles           # Put tutorial.txt in ~/.dotfiles/gred        #
 	mkdir -p ${HOME}/.dotfiles/gred
-	cp "documentation/tutorial.txt" "${HOME}/.dotfiles/gred/"
-	# Put the manual file in /usr/share/man/man1
-	sudo mkdir -p /usr/share/man/man1
-	sudo cp documentation/gred.1 /usr/share/man/man1
+	cp "guide/tutorial.txt" "${HOME}/.dotfiles/gred/"
+	
+	sudo mkdir -p /usr/share/man/man1    # Put the manual file in /usr/share/man/man1  #
+	sudo cp guide/gred.1 /usr/share/man/man1

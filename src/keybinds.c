@@ -64,6 +64,11 @@ struct binding bindings[] = {
     {"[B",      DOWN,},
     {"[D",      LEFT,},
     {"[C",      RIGHT,},
+    // Arrow keys when <Ctrl> is held down.
+    {"[1;5A",      SCROLL_UP},
+    {"[1;5B",      SCROLL_DOWN,},
+    {"[1;5D",      SCROLL_LEFT,},
+    {"[1;5C",      SCROLL_RIGHT,},
     
     // More keys that send multi-character "escape sequences" instead of a single byte.
     {"[3~",     DELETE}, // delete key

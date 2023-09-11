@@ -183,24 +183,22 @@ void menu_elevator_down() {
     cursor_in_menu = 0;
     alert("Elevator down...");
     int last_line = MAX_LINES - find_num_empty_lines();
-    int initial_screen_bottom = last_line;//display_text_bottom;
     do {
         cursor_y += 1;
         if (!isspace(document[cursor_y].text[cursor_x]) && cursor_x < document[cursor_y].len)
             break;
         
-    } while (cursor_y < last_line && cursor_y < initial_screen_bottom);
+    } while (cursor_y < last_line);
     close_menu();
 }
 void menu_elevator_up() {
     cursor_in_menu = 0;
     alert("Elevator up...");
-    int initial_screen_top = 0;//display_text_top;
     do {
         cursor_y -= 1;
         if (!isspace(document[cursor_y].text[cursor_x]) && cursor_x < document[cursor_y].len)
             break;
-    } while (cursor_y > 0 && cursor_y > initial_screen_top);
+    } while (cursor_y > 0);
     close_menu();
 }
 // Automatically scroll the screen.
@@ -213,7 +211,7 @@ void menu_scroll_down_auto() {
         return;
     }
     while (auto_scrolling) {
-        alert("Auto scrolling down. <ctrl-c> to cancel");
+        alert("Auto scrolling down. <ctrl-c> to stop.");
         cursor_y += 1;
         display_text_top += 1;
         display_redraw_all = 1;
@@ -231,7 +229,7 @@ void menu_scroll_up_auto() {
         return;
     }
     while (auto_scrolling) {
-        alert("Auto scrolling up. <ctrl-c> to cancel");
+        alert("Auto scrolling up. <ctrl-c> to stop.");
         cursor_y -= 1;
         display_text_top -= 1;
         display_redraw_all = 1;

@@ -1,6 +1,6 @@
 //See LICENSE file for copyright and license details.
 //
-// Editing lines of text.    ::
+// Editing lines of text.    ::    See /gred/guide/editing.txt for more info.
 //
 #include "gred.h"
 int in_chain = 0; // TODO use these!
