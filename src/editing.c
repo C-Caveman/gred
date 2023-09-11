@@ -21,55 +21,52 @@ struct edit {
 void push_done(struct edit* e);
 int line_insert_char(char c, int x, struct line* l);
 extern int num_undone; // Didn't want this in the header.
+int unused = 0;
+enum edit_direction {DO_EDIT=0, UNDO_EDIT=1};
+void edit(struct edit* e, 
+               int* chain_depth, 
+               int* macro_depth,
+               int undoing_edit
+          );
 
 //
 // Edit the document with these!    ::
 //
 void insert_char(char c, int x, int y) {
     struct edit ed = {INSERT_CHAR, (in_chain) ? IN_CHAIN : 0, c, (char)x, y};
-    push_done(&ed); // Now this edit is stored in the undo/redo system.
-    cursor_x = line_insert_char(c, x, &document[y]);
+    edit(&ed, &unused, &unused, DO_EDIT); // Apply and store the edit in the undo/redo system.
 }
 void delete_char(int x, int y) {
     struct edit ed = {DELETE_CHAR, (in_chain) ? IN_CHAIN : 0, document[y].text[x], (char)x, y};
-    push_done(&ed); // Now this edit is stored in the undo/redo system.
-    cursor_x = line_delete_char(x, &document[y]);
+    edit(&ed, &unused, &unused, DO_EDIT); // Apply and store the edit in the undo/redo system.
 }
 void insert_empty_line(int x, int y) {
     struct edit ed = {INSERT_EMPTY_LINE, (in_chain) ? IN_CHAIN : 0, 0, (char)x, y};
-    push_done(&ed);
-    cursor_y = add_line(y);
+    edit(&ed, &unused, &unused, DO_EDIT); // Apply and store the edit in the undo/redo system.
 }
 void delete_empty_line(int x, int y) {
     struct edit ed = {DELETE_EMPTY_LINE, (in_chain) ? IN_CHAIN : 0, 0, (char)x, y};
-    push_done(&ed);
-    cursor_y = delete_line(y);
+    edit(&ed, &unused, &unused, DO_EDIT); // Apply and store the edit in the undo/redo system.
 }
 void cursor_move(int x, int y) {
     struct edit ed = {CURSOR_MOVE, (in_chain) ? IN_CHAIN : 0, 0, (char)x, y};
-    push_done(&ed);
-    cursor_x = x;
-    cursor_y = y;
+    edit(&ed, &unused, &unused, DO_EDIT); // Apply and store the edit in the undo/redo system.
 }
 void chain_start(int x, int y) {
     struct edit ed = {CHAIN_START, (in_chain) ? IN_CHAIN : 0, 0, (char)x, y};
-    push_done(&ed);
-    in_chain = 1;
+    edit(&ed, &unused, &unused, DO_EDIT); // Apply and store the edit in the undo/redo system.
 }
 void chain_end(int x, int y) {
     struct edit ed = {CHAIN_END,   (in_chain) ? IN_CHAIN : 0, 0, (char)x, y};
-    push_done(&ed);
-    in_chain = 0;
+    edit(&ed, &unused, &unused, DO_EDIT); // Apply and store the edit in the undo/redo system.
 }
 void macro_start(int x, int y) {
     struct edit ed = {MACRO_START, (in_chain) ? IN_CHAIN : 0, 0, (char)x, y};
-    push_done(&ed);
-    in_macro = 1;
+    edit(&ed, &unused, &unused, DO_EDIT); // Apply and store the edit in the undo/redo system.
 }
 void macro_end(int x, int y) {
     struct edit ed = {MACRO_END,   (in_chain) ? IN_CHAIN : 0, 0, (char)x, y};
-    push_done(&ed);
-    in_macro = 0;
+    edit(&ed, &unused, &unused, DO_EDIT); // Apply and store the edit in the undo/redo system.
 }
 
 //                WARNING!
@@ -253,93 +250,64 @@ void pop_undone() {
     }
     num_undone -= 1;
 }
-// Reverse a given edit.
-void reverse_edit(struct edit* e, 
-                  int* chain_depth, 
-                  int* macro_depth) { // direction is -1 for undo, 1 for redo
-    int initial_cursor_y = cursor_y;
-    switch(e->type) {
-            case INSERT_CHAR:
-                cursor_x = line_delete_char(e->x, &document[e->y]);
-                break;
-            case DELETE_CHAR:
-                cursor_x = line_insert_char(e->c, e->x, &document[e->y]);
-                break;
-            case INSERT_EMPTY_LINE:
-                delete_line(e->y);
-                cursor_x = e->x;
-                break;
-            case DELETE_EMPTY_LINE:
-                add_line(e->y);
-                cursor_x = e->x;
-                break;
-            case CURSOR_MOVE:
-                cursor_x = e->x;
-                break;
-            case CHAIN_START:
-                cursor_x = e->x;
-                *chain_depth -= 1;
-                break;
-            case CHAIN_END:
-                cursor_x = e->x;
-                *chain_depth += 1;
-                break;
-            case MACRO_START:
-                cursor_x = e->x;
-                *macro_depth -= 1;
-                break;
-            case MACRO_END:
-                cursor_x = e->x;
-                *macro_depth += 1;
-                break;
-        }
-        if (cursor_y == initial_cursor_y) // Restore the cursor_y position if not already updated.
-            cursor_y = e->y;
-        document[e->y].flags |= CHANGED; // Redraw this line.
-}
-// Redo a given edit.
-void redo_edit(struct edit* e, 
+// Apply an edit (or its opposite).
+void edit(struct edit* e, 
                int* chain_depth, 
-               int* macro_depth) {
+               int* macro_depth,
+               int undoing_edit
+          ) {
     int initial_cursor_y = cursor_y;
-    switch(e->type) {
-            case DELETE_CHAR:
-                cursor_x = line_delete_char(e->x, &document[e->y]);
-                break;
-            case INSERT_CHAR:
-                cursor_x = line_insert_char(e->c, e->x, &document[e->y]);
-                break;
-            case DELETE_EMPTY_LINE:
-                delete_line(e->y);
-                cursor_x = e->x;
-                break;
-            case INSERT_EMPTY_LINE:
-                add_line(e->y);
-                cursor_x = e->x;
-                break;
-            case CURSOR_MOVE:
-                cursor_x = e->x;
-                break;
-            case CHAIN_END:
-                cursor_x = e->x;
-                *chain_depth -= 1;
-                break;
-            case CHAIN_START:
-                cursor_x = e->x;
-                *chain_depth += 1;
-                break;
-            case MACRO_END:
-                cursor_x = e->x;
-                *macro_depth -= 1;
-                break;
-            case MACRO_START:
-                cursor_x = e->x;
-                *macro_depth += 1;
-                break;
-        }
-        if (cursor_y == initial_cursor_y) // Restore the cursor_y position if not already updated.
-            cursor_y = e->y;
+    int edit_type = e->type;
+    if (undoing_edit) {
+        edit_type *= -1; // Mark as the opposite kind of edit.
+        push_undone(e);  // Put this on the redo stack.
+    }
+    else {
+        edit_type = edit_type;
+        push_done(e);    // Put this on the undo stack.
+    }
+    switch(edit_type) {
+    case CURSOR_MOVE: // CURSOR_MOVE is is the same for doing/undoing. 0 * (-1) = 0
+        cursor_x = e->x;
+        break;
+    case DELETE_CHAR:
+        cursor_x = line_delete_char(e->x, &document[e->y]);
+        break;
+    case INSERT_CHAR:
+        cursor_x = line_insert_char(e->c, e->x, &document[e->y]);
+        break;
+    case DELETE_EMPTY_LINE:
+        delete_line(e->y);
+        cursor_x = e->x;
+        break;
+    case INSERT_EMPTY_LINE:
+        add_line(e->y);
+        cursor_x = e->x;
+        break;
+    case CHAIN_END:
+        cursor_x = e->x;
+        *chain_depth -= 1;
+        break;
+    case CHAIN_START:
+        cursor_x = e->x;
+        *chain_depth += 1;
+        break;
+    case MACRO_END:
+        cursor_x = e->x;
+        *macro_depth -= 1;
+        break;
+    case MACRO_START:
+        cursor_x = e->x;
+        *macro_depth += 1;
+        break;
+    }
+    if (cursor_y == initial_cursor_y) // Restore the cursor_y position if not already updated.
+        cursor_y = e->y;
         document[e->y].flags |= CHANGED; // Redraw this line.
+    if (undoing_edit)
+        pop_done();    // Remove the edit from the undo stack.
+    else
+        pop_undone();  // Remove the edit from the redo stack.
 }
 void undo() {
     if (num_done <= 0) // nothing has been done yet
@@ -350,14 +318,11 @@ void undo() {
     while (1) {
         // Put previously done edit onto the undone stack.
         undone_edit = &done[0];
-        push_undone(undone_edit);
-        reverse_edit(undone_edit, &chain_depth, &macro_depth);
+        edit(undone_edit, &chain_depth, &macro_depth, UNDO_EDIT);
         if ( (chain_depth < 1) //((chain_depth < 1) && ((undone_edit->flags | IN_CHAIN) == 0)) 
             || num_done == 0) { // TODO add macro_depth
-            pop_done();
             return;
         }
-        pop_done();
     }
 }
 void redo() {
@@ -369,13 +334,10 @@ void redo() {
     while (1) {
         // Put previously undone edit onto the done stack.
         redone_edit = &undone[0];
-        push_done(redone_edit);
-        redo_edit(redone_edit, &chain_depth, &macro_depth);
+        edit(redone_edit, &chain_depth, &macro_depth, DO_EDIT);
         if ( (chain_depth < 1) //((chain_depth < 1) && ((redone_edit->flags | IN_CHAIN) == 0)) 
             || num_undone == 0) {
-            pop_undone();
             return;
         }
-        pop_undone();
     }
 }

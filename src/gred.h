@@ -28,15 +28,15 @@ enum line_flags { // properties a line of text can have
 // Changes to the document are made using the functions in "editing.c"   ::
 //
 enum edit_types {
-    INSERT_CHAR, // Add a character at x,y.
-    DELETE_CHAR, // Remove a character at x,y.
-    INSERT_EMPTY_LINE, // Add a line at y.
-    DELETE_EMPTY_LINE, // Remove a line at y.
-    CURSOR_MOVE, // Move cursor to x,y. (used for tracking unusual cursor movement)
-    CHAIN_START, // Bookend a chain of multiple edits.
-    CHAIN_END,   //  (bookended edits are undone/redone as one)
-    MACRO_START,
-    MACRO_END,
+    CURSOR_MOVE= 0, // Move cursor to x,y. (used for tracking unusual cursor movement)
+    INSERT_CHAR= 1, // Add a character at x,y.
+    DELETE_CHAR=-1, // Remove a character at x,y.
+    INSERT_EMPTY_LINE= 2, // Add a line at y.
+    DELETE_EMPTY_LINE=-2, // Remove a line at y.
+    CHAIN_START= 4, // Bookend a chain of multiple edits.
+    CHAIN_END=  -4, //    (bookended edits are undone/redone as one)
+    MACRO_START=  5,
+    MACRO_END=   -5,
 };
 enum edit_flags { // Used to mark edits as part of a CHAIN/MACRO.
     IN_CHAIN =  0b1,

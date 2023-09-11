@@ -125,13 +125,15 @@ void run_command(int command_id) {
     case DELETE_WORD: // TODO this <-------------------------------------- TODO
         break;
     case DELETE_LINE:
+        int start_x = cursor_x;
+        int start_y = cursor_y;
         chain_start(cursor_x, cursor_y);
         while(document[cursor_y].len > 0) {
             delete_char(0, cursor_y);
         }
         delete_empty_line(cursor_x, cursor_y);
         cursor_y += 1;
-        chain_end(cursor_x, cursor_y);
+        chain_end(start_x, start_y);
         break;
     case DELETE_TRAILING:
         chain_start(cursor_x, cursor_y);
