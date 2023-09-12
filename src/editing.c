@@ -184,7 +184,7 @@ void merge_line_upwards(int row) { // TODO clean this up! <---------------------
     int last_line_len = document[row-1].len;
     
     // move the current line up
-    chain_start(cursor_x, row-1);
+    chain_start(cursor_x, cursor_y);
     while (document[row].len > 0) {
         insert_char(document[row].text[0], document[row-1].len, row-1);
         delete_char(0, row);
@@ -196,7 +196,7 @@ void merge_line_upwards(int row) { // TODO clean this up! <---------------------
     
     // remove the old line
     delete_empty_line(cursor_x, row);
-    chain_end(cursor_x, cursor_y);
+    chain_end(last_line_len, row-1);
     cursor_x = last_line_len;
 }
 
