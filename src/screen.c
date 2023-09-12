@@ -11,6 +11,7 @@ int display_text_bottom = 0; // Last visible document line on screen.
 // set cursor position in terminal (where cursor is shown, and text from printf goes)
 void move_cursor(int x, int y) {
     x = bound_value(x, 0, display_full_width); // keep cursor in the display space
+    //y = bound_value(y, 0, display_full_height); // keep cursor in the display space
     printf("\033[%d;%dH", y+1, x+1); // move cursor to x,y
 }
 

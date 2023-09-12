@@ -77,6 +77,10 @@ extern int num_undone; // Didn't want this in the header. Used to clear out the 
 void insert(char c) {
     int line_len = document[cursor_y].len;
     num_undone = 0; // Clear out the redo stack.
+    if (cursor_y > LINE_WIDTH-2) {
+        alert("Cursor at end of line.");
+        return;
+    }
     if (c == BACKSPACE) {
         if (cursor_x == 0 && cursor_y > 0) { // merge current and previous lines
             merge_line_upwards(cursor_y);
@@ -89,7 +93,7 @@ void insert(char c) {
         }
         return;
     }
-    if (document[cursor_y].len < LINE_WIDTH) { // insert the current character
+    if (document[cursor_y].len < LINE_WIDTH-1) { // insert the current character
         if (c == '\n') {
             handle_insert_mode_newline(cursor_x, cursor_y);
         }

@@ -12,7 +12,7 @@ struct edit {
     char type;
     char flags;
     char c;
-    char x;
+    unsigned char x;
     int y;
 };
 //                   WARNING!!!!
@@ -33,39 +33,39 @@ void edit(struct edit* e,
 // Edit the document with these!    ::
 //
 void insert_char(char c, int x, int y) {
-    struct edit ed = {INSERT_CHAR, (in_chain) ? IN_CHAIN : 0, c, (char)x, y};
+    struct edit ed = {INSERT_CHAR, (in_chain) ? IN_CHAIN : 0, c, x, y};
     edit(&ed, &unused, &unused, DO_EDIT); // Apply and store the edit in the undo/redo system.
 }
 void delete_char(int x, int y) {
-    struct edit ed = {DELETE_CHAR, (in_chain) ? IN_CHAIN : 0, document[y].text[x], (char)x, y};
+    struct edit ed = {DELETE_CHAR, (in_chain) ? IN_CHAIN : 0, document[y].text[x], x, y};
     edit(&ed, &unused, &unused, DO_EDIT); // Apply and store the edit in the undo/redo system.
 }
 void insert_empty_line(int x, int y) {
-    struct edit ed = {INSERT_EMPTY_LINE, (in_chain) ? IN_CHAIN : 0, 0, (char)x, y};
+    struct edit ed = {INSERT_EMPTY_LINE, (in_chain) ? IN_CHAIN : 0, 0, x, y};
     edit(&ed, &unused, &unused, DO_EDIT); // Apply and store the edit in the undo/redo system.
 }
 void delete_empty_line(int x, int y) {
-    struct edit ed = {DELETE_EMPTY_LINE, (in_chain) ? IN_CHAIN : 0, 0, (char)x, y};
+    struct edit ed = {DELETE_EMPTY_LINE, (in_chain) ? IN_CHAIN : 0, 0, x, y};
     edit(&ed, &unused, &unused, DO_EDIT); // Apply and store the edit in the undo/redo system.
 }
 void cursor_move(int x, int y) {
-    struct edit ed = {CURSOR_MOVE, (in_chain) ? IN_CHAIN : 0, 0, (char)x, y};
+    struct edit ed = {CURSOR_MOVE, (in_chain) ? IN_CHAIN : 0, 0, x, y};
     edit(&ed, &unused, &unused, DO_EDIT); // Apply and store the edit in the undo/redo system.
 }
 void chain_start(int x, int y) {
-    struct edit ed = {CHAIN_START, (in_chain) ? IN_CHAIN : 0, 0, (char)x, y};
+    struct edit ed = {CHAIN_START, (in_chain) ? IN_CHAIN : 0, 0, x, y};
     edit(&ed, &unused, &unused, DO_EDIT); // Apply and store the edit in the undo/redo system.
 }
 void chain_end(int x, int y) {
-    struct edit ed = {CHAIN_END,   (in_chain) ? IN_CHAIN : 0, 0, (char)x, y};
+    struct edit ed = {CHAIN_END,   (in_chain) ? IN_CHAIN : 0, 0, x, y};
     edit(&ed, &unused, &unused, DO_EDIT); // Apply and store the edit in the undo/redo system.
 }
 void macro_start(int x, int y) {
-    struct edit ed = {MACRO_START, (in_chain) ? IN_CHAIN : 0, 0, (char)x, y};
+    struct edit ed = {MACRO_START, (in_chain) ? IN_CHAIN : 0, 0, x, y};
     edit(&ed, &unused, &unused, DO_EDIT); // Apply and store the edit in the undo/redo system.
 }
 void macro_end(int x, int y) {
-    struct edit ed = {MACRO_END,   (in_chain) ? IN_CHAIN : 0, 0, (char)x, y};
+    struct edit ed = {MACRO_END,   (in_chain) ? IN_CHAIN : 0, 0, x, y};
     edit(&ed, &unused, &unused, DO_EDIT); // Apply and store the edit in the undo/redo system.
 }
 
@@ -73,19 +73,19 @@ void macro_end(int x, int y) {
 // Change a line. Avoid calling these on the document, use the ones above to get undo/redo saved! ::
 //
 // insert char c on line l, return new cursor_x position
-int line_insert_char(char c, int cursor_x_pos, struct line* l) {
-    if (c == '\n' || l->len > LINE_WIDTH-2 || c == ESCAPE) // Skip invalid characters.
-        return cursor_x_pos;
-    for (int i=l->len; i>cursor_x_pos; i--) // Trailing letters move to the right.
+int line_insert_char(char c, int insert_pos, struct line* l) {
+    if (c == '\n' || l->len > LINE_WIDTH-2 || insert_pos > LINE_WIDTH-2 || c == ESCAPE) // Skip invalid characters.
+        return insert_pos;
+    for (int i=l->len; i>insert_pos; i--) // Trailing letters move to the right.
         l->text[i] = l->text[i-1];
-    l->text[cursor_x_pos] = c;
+    l->text[insert_pos] = c;
     l->len += 1;
     l->text[l->len] = '\0';
     l->flags |= CHANGED;
-    return (cursor_x_pos + 1);
+    return (insert_pos + 1);
 }
 int line_delete_char(int deleted_pos, struct line* l) { // TODO clean this up a bit.
-    if (deleted_pos < 0 || deleted_pos > l->len) // invalid delete
+    if (deleted_pos < 0 || deleted_pos > l->len || l->len < 1) // invalid delete
         return deleted_pos;
     l->text[l->len] = '\0';// Terminated!
     for (int i=deleted_pos; i < l->len; i++) // Trailing letters move to the left.

@@ -14,7 +14,7 @@ src/screen.c
 makeFileDir := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
 gred: ${SOURCES} src/gred.h Makefile
-	gcc ${SOURCES} -o gred -lpthread
+	gcc -g ${SOURCES} -o gred -lpthread
 
 install: gred
 	if [ "${USER}" = "root" ]; then printf "\n***\nUsage is 'make install' without a leading 'sudo'.\n***\n\n"; exit 1; fi

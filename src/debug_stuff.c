@@ -9,9 +9,9 @@ char mode_names[NUM_MODES][MAX_MODE_NAME_LEN] = {
     "COMMAND_MODE",
 };
 
-void doi() {
+void doi(char* msg) {
     system("clear");
-    printf("DOI!!!\n");
+    printf("DOI!!! %s\n", msg);
     exit(0);
 }
 
