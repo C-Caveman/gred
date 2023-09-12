@@ -9,7 +9,7 @@
 #include <termios.h>   // instant terminal input in getch()
 #include "string.h"    // strnlen() in draw_screen()
 #include <ctype.h>     // isprint() in handle_input()
-#include <signal.h>    // Catch ctrl-c when auto_scrolling
+#include <pthread.h>   // For the auto_scrolling job.
 
 // Lines of text that make up a document.
 #define LINE_WIDTH 256
@@ -196,7 +196,6 @@ int get_command(char c);
 void run_command(int command_id);
 // perform an operation for a given escape code
 void run_escape_code(int escape_code_index);
-void auto_scroll_interrupt(); // Stop auto_scrolling upon ctrl-c.
 
 //
 // Menus:            ::

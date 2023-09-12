@@ -3,16 +3,11 @@
 #include "gred.h" 
 
 int auto_scroll_delay = 400000;
-void auto_scroll_interrupt() {
+// Stop scrolling as soon as a character is pressed.
+void* auto_scroller_job() {
+    char dummy = getch();
+    auto_scrolling = 0;
     close_menu();
-    document[cursor_y].flags |= CHANGED; // paint over the ^C
-    if (auto_scrolling) {
-        auto_scrolling = 0;
-    }
-    else {
-        system("clear");
-        exit(0);
-    }
 }
 
 #define ALERT_SIZE 64 // Max size for menu_alert buffer.
@@ -210,8 +205,10 @@ void menu_scroll_down_auto() {
         auto_scrolling = 0;
         return;
     }
-    while (auto_scrolling) {
-        alert("Auto scrolling down. <ctrl-c> to stop.");
+    pthread_t scroller_thread;
+    pthread_create(&scroller_thread, NULL, auto_scroller_job, 0); // auto scroll
+    while (auto_scrolling == 1) {
+        alert("Auto scrolling... Press any key to stop.");
         cursor_y += 1;
         display_text_top += 1;
         display_redraw_all = 1;
@@ -219,6 +216,7 @@ void menu_scroll_down_auto() {
         fflush(stdout);
         usleep(auto_scroll_delay);
     }
+    pthread_join(scroller_thread, NULL); // Stop the thread.
 }
 void menu_scroll_up_auto() {
     auto_scrolling = 1;
@@ -228,8 +226,10 @@ void menu_scroll_up_auto() {
         auto_scrolling = 0;
         return;
     }
-    while (auto_scrolling) {
-        alert("Auto scrolling up. <ctrl-c> to stop.");
+    pthread_t scroller_thread;
+    pthread_create(&scroller_thread, NULL, auto_scroller_job, 0); // Listen for the next character.
+    while (auto_scrolling == 1) {
+        alert("Auto scrolling... Press any key to stop.");
         cursor_y -= 1;
         display_text_top -= 1;
         display_redraw_all = 1;
@@ -237,6 +237,7 @@ void menu_scroll_up_auto() {
         fflush(stdout);
         usleep(auto_scroll_delay);
     }
+    pthread_join(scroller_thread, NULL); // Stop the thread.
 }
 
 

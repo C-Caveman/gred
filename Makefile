@@ -12,7 +12,7 @@ src/input.c \
 src/screen.c
 
 gred: ${SOURCES} src/gred.h Makefile
-	gcc ${SOURCES} -o gred
+	gcc ${SOURCES} -o gred -lpthread
 
 install: gred
 	sudo cp gred /usr/local/bin/gred     # Put the binary in /usr/local/bin            #

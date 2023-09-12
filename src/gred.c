@@ -166,7 +166,6 @@ int main(int argc, char* argv[]) {
     remember_mode(COMMAND_MODE);
     display_redraw_all = 1; // Redraw the screen.
     menu = 0;
-    signal(SIGINT, auto_scroll_interrupt); // Ctrl-c ends auto_scrolling.
     while (!quit) {
         draw_screen();
         // Get the next key that the user pressed.
