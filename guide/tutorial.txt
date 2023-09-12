@@ -2,44 +2,69 @@
 :: Tutorial:
 ------------
 
-Move the cursor:
-
-   <k>         ↑  
-<h> · <l>    ← · →    Arrow keys also work.
-   <j>         ↓
-
-Scroll the screen:
+o-------------------------------------------o
+| Move                                      |
+o-------------------------------------------o
+|                                           |
+|   [arrow keys]      or   [these keys]     |
+|                                           |
+|        ▲                     <k>          |    Move up by pressing   <k>
+|      ◀   ▶                <h>   <l>       |
+|        ▼                     <j>          |    Move down by pressing <j>
+|                                           |
+o-------------------------------------------o                      
+      
   
-   <K>         ↑  
-<H> · <L>    ← · →
-   <J>         ↓
+o---------------------------------------------o
+| Scroll                                      |
+o---------------------------------------------o
+|                                             |
+|    [ <Ctrl> + ]                             |
+|    [arrow keys]    or   [capital letters]   |
+|                                             |
+|         ▲                    <K>            |
+|       ◀   ▶               <H>   <L>         |
+|         ▼                    <J>            |
+|                                             |
+o---------------------------------------------o
+
 
 ---------------------------------------------
 :: Editing basics:
 ------------------
 
-Insert text:           (go ahead and write stuff here, it won't be saved)
-    <i>
+o--------------------o
+| Insert text:       |
+o--------------------o
+|     <i>            |  (this puts you in INSERT_MODE)                                                
+o--------------------o
+ 
+o--------------------o
+| Stop inserting:    |
+o--------------------o
+|     <escape>       |  (this puts you in COMMAND_MODE)
+o--------------------o
 
-Stop inserting: 
-    <escape>
 
-Commands:      (usable when not inserting text)
-    <s>  save
-    <q>  quit
-    <u>  undo
-    <r>  redo    
 
-    <h>  move the cursor (yes, these are commands)
-    <j>
-    <k>
-    <l>
-
-    <H>  move the screen (these are also commands)
-    <J>
-    <K>
-    <L>
-
+o--------------------------------------------------------o 
+| COMMAND_MODE:                                          |
+o--------------------------------------------------------o
+|     <s>  save                                          |
+|     <q>  quit                                          |
+|     <u>  undo                                          |
+|     <r>  redo                                          |
+|                                                        |
+|     <h>  move the cursor (yes, these are commands)     |
+|     <j>                                                |
+|     <k>                                                |
+|     <l>                                                |
+|                                                        |
+|     <H>  move the screen (these are also commands)     |
+|     <J>                                                |
+|     <K>                                                |
+|     <L>                                                |
+o--------------------------------------------------------o
 
 
 ----------------------------------

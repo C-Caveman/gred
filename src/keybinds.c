@@ -18,7 +18,7 @@ struct binding bindings[] = {
     {"d", DELETE}, // delete current char
     //{"d", DELETE_WORD}, // delete current word TODO this
     {"X", DELETE_TRAILING}, // delete from cursor_x to end of line
-    {"x", DELETE_LINE}, // delete the current line
+    {"x", DELETE_A_LINE}, // delete the current line
     {"i", SWITCH_TO_INSERT_MODE}, // insert mode
     {"I", SWITCH_TO_INSERT_MODE_AT_START_OF_LINE}, // goto start, insert
     {"a", SWITCH_TO_INSERT_MODE_AT_END_OF_LINE}, // goto end, insert

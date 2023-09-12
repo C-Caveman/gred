@@ -124,7 +124,7 @@ void run_command(int command_id) {
         break;
     case DELETE_WORD: // TODO this <-------------------------------------- TODO
         break;
-    case DELETE_LINE:
+    case DELETE_A_LINE:
         int start_x = cursor_x;
         int start_y = cursor_y;
         chain_start(cursor_x, cursor_y);
