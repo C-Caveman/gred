@@ -16,6 +16,8 @@ char macro_msg[] = "Press <escape> twice to end the macro.";
 
 // run a command from the commands enum in gred.h (can be from a keybind or an escape code)
 void run_command(int command_id) {
+    int start_x = cursor_x; // Used for remembering the cursor's initial position.
+    int start_y = cursor_y;
     switch(command_id) {
     case NO_COMMAND: // In an escape sequence, or got an invalid input.
         break;
@@ -124,9 +126,7 @@ void run_command(int command_id) {
         break;
     case DELETE_WORD: // TODO this <-------------------------------------- TODO
         break;
-    case DELETE_A_LINE:
-        int start_x = cursor_x;
-        int start_y = cursor_y;
+    case DELETE_LINE:
         chain_start(cursor_x, cursor_y);
         while(document[cursor_y].len > 0) {
             delete_char(0, cursor_y);
