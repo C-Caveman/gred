@@ -154,14 +154,11 @@ char prev_char = '?';
 int main(int argc, char* argv[]) {
     // Make sure that the terminal supports alternative cursor types.
     mode_specific_cursors_enabled = check_vertical_bar_cursor_supported();
-    /*
     if (argc > 1) {
         load_file(argv[1]);
         strncpy(file_name.text, argv[1], LINE_WIDTH-1);
         file_name.len = strnlen(file_name.text, LINE_WIDTH-1);
     }
-    */
-    load_file("/home/leo/FOOD_DIARY.txt");
     update_settings_from_file_type(get_file_type(&file_name));
     cursor_y = 0;
     cursor_x = 0;
