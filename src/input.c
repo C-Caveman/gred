@@ -77,7 +77,7 @@ extern int num_undone; // Didn't want this in the header. Used to clear out the 
 void insert(char c) {
     int line_len = document[cursor_y].len;
     num_undone = 0; // Clear out the redo stack.
-    if (cursor_y > LINE_WIDTH-2) {
+    if (cursor_x > LINE_WIDTH-2) {
         alert("Cursor at end of line.");
         return;
     }
