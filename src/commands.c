@@ -2,6 +2,10 @@
 // Help info for using gred, the Grid-based text Editor
 #include "gred.h"
 
+int selecting = 0;
+int sel_cursor_x = 0;
+int sel_cursor_y = 0;
+
 // Tutorial information (used for switching to and from the tutorial).
 int in_tutorial = 0;
 struct line pre_tutorial_file_name;
@@ -175,6 +179,18 @@ void run_command(int command_id) {
         chain_end(cursor_x, cursor_y);
         switch_mode(INSERT_MODE);
         remember_mode(INSERT_MODE);
+        break;
+    case SELECT: // Set a selection.
+        if (selecting) {
+            selecting = 0;
+            alert("Stopped selecting.");
+        }
+        else {
+            selecting = 1;
+            sel_cursor_x = cursor_x;
+            sel_cursor_y = cursor_y;
+            alert("Started selecting.");
+        }
         break;
     case MACRO:
         in_macro = 1;

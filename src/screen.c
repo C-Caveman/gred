@@ -2,6 +2,11 @@
 // Screen for displaying the document, line numbers, menus, ect.
 #include "gred.h"
 
+int sel_bottom = 0;
+int sel_top = 0;
+int sel_left = 0;
+int sel_right = 0;
+
 // Previous values of settings.
 int old_show_line_numbers = 1;
 int display_text_top_old = 0; // First visible document line on screen.
@@ -16,18 +21,23 @@ void move_cursor(int x, int y) {
 }
 
 // print a line of the document
-void display_line(struct line* l, int start_index, int stop_index) {
-    //stop_index = bound_value(stop_index, start_index, document[line_number].len);
+void display_line(int row, int start_index, int stop_index) {
+    struct line* l = &document[row];
     stop_index = bound_value(l->len, 0, stop_index);
     start_index = bound_value(start_index, 0, stop_index);
     char c;
     for (int i=start_index; i<stop_index; i++) {
+        if (i == sel_left && selecting && row >= sel_top && row <= sel_bottom)
+            printf("\033[107m");
+        if (i == sel_right && selecting)
+            printf("\033[0m");
         c = l->text[i];
         if (c == '\t')
             printf("%s", "░"); // could use "»" instead
         else
             putchar(c);
     }
+    printf("\033[0m"); // Stop coloring just in case.
 }
 
 int find_num_width(int num) {
@@ -69,6 +79,11 @@ void draw_screen() {
     }
     // Keep the cursor inside the document.
     clip_cursor_to_grid();
+    // Update the selection.
+    sel_bottom = (sel_cursor_y > cursor_y) ? sel_cursor_y : cursor_y;
+    sel_top = (sel_cursor_y < cursor_y) ? sel_cursor_y : cursor_y;
+    sel_left = (cursor_x < sel_cursor_x) ? cursor_x : sel_cursor_x;
+    sel_right = (cursor_x > sel_cursor_x) ? cursor_x : sel_cursor_x;
     // Redraw the screen if needed.
     if ((old_show_line_numbers != show_line_numbers) ||
         (display_text_top_old != display_text_top) ||
@@ -90,8 +105,8 @@ void draw_screen() {
     clip_cursor_to_grid(); // clip the horizontal scrolling as well
     for (int i=display_text_top; i<display_text_top+display_text_height; i++) {
         // Skip unedited lines (if not refreshing whole screen)
-        if (!display_redraw_all && !(document[i].flags & CHANGED))
-            continue;
+        //if (!display_redraw_all && !(document[i].flags & CHANGED))TODO undo this TODO
+        //    continue;
         // mark line as unchanged again
         document[i].flags &= ~CHANGED;
         move_cursor(0, i); // Move cursor to start of current line.
@@ -99,9 +114,9 @@ void draw_screen() {
         if (show_line_numbers == 1)
             printf("%*d: ", line_number_width, i);
         if (colorize)
-            display_line_highlighted(&document[i], display_text_x_start, display_text_x_end);
+            display_line_highlighted(i, display_text_x_start, display_text_x_end);
         else
-            display_line(&document[i], display_text_x_start, display_text_x_end);
+            display_line(i, display_text_x_start, display_text_x_end);
         // bottom of the screen reached?
         if (i-display_text_top > display_full_height-menu_height) {
             break;

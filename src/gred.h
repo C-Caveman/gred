@@ -69,6 +69,9 @@ extern int auto_scroll_delay; // Time in uSec between scrolls.
 // Cursor position in document:
 extern int cursor_x; // where we are in the document
 extern int cursor_y;
+extern int selecting;
+extern int sel_cursor_x;
+extern int sel_cursor_y;
 
 // Current command and input character:
 extern int command;
@@ -85,6 +88,10 @@ struct binding {
 extern struct binding bindings[];
 
 // Screen data:
+extern int sel_bottom;
+extern int sel_top;
+extern int sel_left;
+extern int sel_right;
 extern int display_text_top; // index of the top line displayed on the screen
 extern int display_text_bottom; // index of bottom document line on screen
 extern int display_text_top_old; // Previous top line of document displayed.
@@ -141,11 +148,11 @@ void draw_screen();
 void draw_menu();
 // keep the cursor from leaving the document
 void clip_cursor_to_grid();
-void display_line_highlighted(struct line* l, int left_index, int right_index);
+void display_line_highlighted(int row, int left_index, int right_index);
 // set cursor position in terminal (where cursor is shown, and text from printf goes)
 void move_cursor(int x, int y);
 // print a line of the document
-void display_line(struct line* l, int start_index, int stop_index);
+void display_line(int row, int start_index, int stop_index);
 // Check if the terminal supports having a vertical bar for the cursor.
 int check_vertical_bar_cursor_supported();
 
@@ -243,7 +250,6 @@ void remember_mode(int next_mode);
 void debug_input(char c);
 void print_debug_input(char c);
 void print_debug_mode(int state);
-void test_highlighting();
 void doi(); // Print "DOI!!!" and quit.
 // misc utilites
 int bound_value(int v, int min, int max); // clips value to [min, max]

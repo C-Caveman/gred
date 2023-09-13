@@ -13,6 +13,7 @@ struct binding bindings[] = {
     // Editing:
     {"u", UNDO}, // undo
     {"r", REDO}, // redo
+    {"S", SELECT}, // begin selecting text
     {"c", COPY}, // copy selected text TODO copy current word if no selection
     {"v", PASTE}, // paste from clipboard
     {"d", DELETE}, // delete current char
