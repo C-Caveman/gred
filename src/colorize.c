@@ -202,6 +202,19 @@ void display_line_highlighted(int row, int start_index, int stop_index) {
             printf("%s", "░"); // replace tabs
         else
             putchar(l->text[i]);
+        int highlight_ended_inside_unicode_chunk = 0;
+        // Fill out the rest of the character if it is a multi-byte utf-8 character.
+        while (((l->text[i+1] & 0b10000000) != 0) && ((i+1)<stop_index)) {
+            putchar(l->text[++i]);
+            if (i == sel_right && selecting)
+                highlight_ended_inside_unicode_chunk = 1;
+        }
+        // Highlighting end.
+        if (highlight_ended_inside_unicode_chunk) {
+            in_highlight = 0;
+            cur_color = -1;
+            printf("\033[0m");
+        }
     }
     printf("\033[0m"); // Reset to the default print color.
 }
