@@ -16,7 +16,7 @@ makeFileDir := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 gred: ${SOURCES} src/gred.h Makefile
 	gcc -g ${SOURCES} -o gred -lpthread
 
-install: gred
+install: gred Makefile
 	if [ "${USER}" = "root" ]; then printf "\n***\nUsage is 'make install' without a leading 'sudo'.\n***\n\n"; exit 1; fi
 	
 	sudo cp "${makeFileDir}/gred" /usr/local/bin/gred     # Put the binary in /usr/local/bin            #

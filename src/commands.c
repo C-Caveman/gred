@@ -5,6 +5,9 @@
 int selecting = 0;
 int sel_cursor_x = 0;
 int sel_cursor_y = 0;
+#define COPY_BUFFER_SIZE 4096
+int copy_len = 0;
+char copy_buffer[COPY_BUFFER_SIZE];
 
 // Tutorial information (used for switching to and from the tutorial).
 int in_tutorial = 0;
@@ -181,6 +184,7 @@ void run_command(int command_id) {
         remember_mode(INSERT_MODE);
         break;
     case SELECT: // Set a selection.
+        display_redraw_all = 1;
         if (selecting) {
             selecting = 0;
             alert("Stopped selecting.");
@@ -191,6 +195,45 @@ void run_command(int command_id) {
             sel_cursor_y = cursor_y;
             alert("Started selecting.");
         }
+        break;
+    case COPY:
+        copy_len = 0;
+        if (!selecting && (cursor_x < document[cursor_y].len)) {
+            copy_buffer[0] = document[cursor_y].text[cursor_x];
+            copy_len = 1;
+        }
+        if (selecting) {
+            cursor_x = sel_left; //TODO confirm sel bounds
+            cursor_y = sel_top;
+            for (int i=0; i<COPY_BUFFER_SIZE; i++) {
+                if (cursor_x > sel_right)
+                    break;
+                else if (cursor_x < document[cursor_y].len)
+                    copy_buffer[i] = document[cursor_y].text[cursor_x];
+                copy_len += 1;
+                cursor_x += 1;
+            }
+            cursor_x = start_x;
+            cursor_y = start_y;
+        }
+        if (copy_len < COPY_BUFFER_SIZE-1) // null terminate, so it prints properly
+            copy_buffer[copy_len] = 0;
+        alert(copy_buffer);
+        break;
+    case PASTE:
+        alert("Paste.");
+        if (copy_len < 1) // If nothing copied, don't paste.
+            break;
+        chain_start(cursor_x, cursor_y);
+        if (cursor_x > document[cursor_y].len)
+            cursor_x = document[cursor_y].len;
+        for (int i=0; i<copy_len; i++) {
+            if (copy_buffer[i] == '\n')
+                insert_empty_line(cursor_x, cursor_y);
+            else
+                insert_char(copy_buffer[i], cursor_x, cursor_y);
+        }
+        chain_end(cursor_x, cursor_y);
         break;
     case MACRO:
         in_macro = 1;

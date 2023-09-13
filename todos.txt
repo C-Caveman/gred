@@ -1,5 +1,3 @@
-Selections
-
 Utf-8 multi-byte character support.
 
 Delete word binding.

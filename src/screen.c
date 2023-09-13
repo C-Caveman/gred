@@ -105,8 +105,8 @@ void draw_screen() {
     clip_cursor_to_grid(); // clip the horizontal scrolling as well
     for (int i=display_text_top; i<display_text_top+display_text_height; i++) {
         // Skip unedited lines (if not refreshing whole screen)
-        //if (!display_redraw_all && !(document[i].flags & CHANGED))TODO undo this TODO
-        //    continue;
+        if (!display_redraw_all && !(document[i].flags & CHANGED) && !(selecting))
+            continue;
         // mark line as unchanged again
         document[i].flags &= ~CHANGED;
         move_cursor(0, i); // Move cursor to start of current line.
