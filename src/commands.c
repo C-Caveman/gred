@@ -94,6 +94,10 @@ void run_command(int command_id) {
         cursor_x += 1;
         display_text_x_start += 1;
         break;
+    case SCROLL_CENTER:
+        alert("Screen centered.");
+        display_text_top = cursor_y - (display_full_height/2);
+        break;
     case SCROLL_PAGE_UP: // Move screen up by (display_text_height-1).
         display_text_top -= display_text_height-1;
         cursor_y -= display_text_height-1;
@@ -258,8 +262,13 @@ void run_command(int command_id) {
     //
     // SAVE and QUIT:
     //
-    case SAVE:
+    case SAVE_AS:
+        alert("Opening save menu...");
         open_menu(&menu_save_file);
+        break;
+    case SAVE:
+        alert("File saved.");
+        save_file(file_name.text);
         break;
     case QUIT:
         if (in_tutorial) {
@@ -319,6 +328,10 @@ void run_command(int command_id) {
             strncpy(file_name.text, pre_tutorial_file_name.text, LINE_WIDTH);
             file_name.len = strlen(pre_tutorial_file_name.text);
         }
+        break;
+    case SAVE_AND_QUIT:
+        save_file(file_name.text);
+        quit = 1;
         break;
     case DEBUG:
         system("clear");

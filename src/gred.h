@@ -273,11 +273,11 @@ enum COMMANDS_ENUM {
     SCROLL_DOWN,
     SCROLL_LEFT,
     SCROLL_RIGHT,
+    SCROLL_CENTER,
     SCROLL_UP_AUTO_SLOW,
     SCROLL_DOWN_AUTO_SLOW,
     SCROLL_UP_AUTO_FAST,
     SCROLL_DOWN_AUTO_FAST,
-
     SCROLL_PAGE_UP,
     SCROLL_PAGE_DOWN,
     SEARCH,
@@ -310,7 +310,9 @@ enum COMMANDS_ENUM {
     DEBUG,
     MACRO,
     SAVE,
+    SAVE_AS,
     QUIT,
+    SAVE_AND_QUIT,
     HELP,
 };
 extern char secret_message[];

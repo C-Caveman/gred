@@ -13,7 +13,7 @@ struct binding bindings[] = {
     // Editing:
     {"u", UNDO}, // undo
     {"r", REDO}, // redo
-    {"S", SELECT}, // begin selecting text
+    {"s", SELECT}, // begin selecting text
     {"c", COPY}, // copy selected text TODO copy current word if no selection
     {"v", PASTE}, // paste from clipboard
     {"d", DELETE}, // delete current char
@@ -26,7 +26,9 @@ struct binding bindings[] = {
     {"o", SWITCH_TO_INSERT_MODE_IN_NEW_LINE_BELOW}, // insert new line below
     {"O", SWITCH_TO_INSERT_MODE_IN_NEW_LINE_ABOVE}, // insert new line above
     {"q", QUIT}, // quit
-    {"s", SAVE}, // save file
+    {";s", SAVE}, // save file
+    {";S", SAVE_AS}, // save as (<Ctrl-s>)
+    {"z", SAVE_AND_QUIT}, // save and quit
     
     // Navigation:
     {"/", SEARCH}, // search for word
@@ -42,14 +44,15 @@ struct binding bindings[] = {
     {"J", SCROLL_DOWN},
     {"H", SCROLL_LEFT},
     {"L", SCROLL_RIGHT},
+    {"\'", SCROLL_CENTER}, // center the screen
     {";j", SCROLL_DOWN_AUTO_FAST}, // scroll automatically
     {";k", SCROLL_UP_AUTO_FAST}, // scroll automatically
     {";J", SCROLL_DOWN_AUTO_SLOW}, // scroll automatically
     {";K", SCROLL_UP_AUTO_SLOW}, // scroll automatically
     {"0", GOTO_LINE_START}, // goto start of line
-    {";s", GOTO_LINE_START}, // goto start of line
+    {";;", GOTO_LINE_START}, // goto start of line
     {"$", GOTO_LINE_END}, // goto end of line
-    {";e", GOTO_LINE_END}, // goto end of line
+    {";l", GOTO_LINE_END}, // goto end of line
     {"g", GOTO_DOCUMENT_TOP}, // goto top of document
     {"G", GOTO_DOCUMENT_BOTTOM}, // goto bottom of document
     

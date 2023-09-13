@@ -48,22 +48,33 @@ o--------------------o
 
 
 o--------------------------------------------------------o 
-| COMMAND_MODE:                                          |
+| COMMAND_MODE:     (basics)                             |
 o--------------------------------------------------------o
-|     <s>  save                                          |
+|    <;s>  save      (press <;> then <s>)                |
+|    <;S>  save as                                       |
+|                                                        |
 |     <q>  quit                                          |
+|                                                        |
+|     <z>  save and quit                                 |
+|                                                        |
 |     <u>  undo                                          |
 |     <r>  redo                                          |
 |                                                        |
-|     <h>  move the cursor (yes, these are commands)     |
+|     <s>  select                                        |
+|     <c>  copy                                          |
+|     <p>  paste                                         |
+|                                                        |
+|     <h>  move the cursor    (all of these are commands)|
 |     <j>                                                |
 |     <k>                                                |
 |     <l>                                                |
 |                                                        |
-|     <H>  move the screen (these are also commands)     |
+|     <H>  scroll the screen                             |
 |     <J>                                                |
 |     <K>                                                |
 |     <L>                                                |
+|                                                        |
+|     <'>  center the screen                             |
 o--------------------------------------------------------o
 
 
@@ -77,11 +88,9 @@ Commands:
     <e>  elevator down    (go down until reaching a letter)
     <E>  elevator up
 
-    <;s> start of line
-    <0>  (same as above)
+    <;;> start of line
 
-    <;e>  end of line
-    <$>
+    <;l> end of line
 
     <g>  go to first line
     <G>  go to last line

@@ -3,8 +3,8 @@
 // Editing lines of text.    ::    See /gred/guide/editing.txt for more info.
 //
 #include "gred.h"
-int in_chain = 0; // TODO use these!
-int in_macro = 0;
+int in_chain = 0;
+int in_macro = 0; // TODO use this!
 struct line macro_buffer;
 
 // A change to the document. Can be undone/redone.    ::
