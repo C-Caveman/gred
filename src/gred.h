@@ -65,6 +65,8 @@ extern int in_macro; // Whether recording a macro or not. Used by undo_redo.c
 extern struct line macro_buffer; // Characters recorded for a macro.
 extern volatile int auto_scrolling; // Whether scrolling automatically or not.
 extern int auto_scroll_delay; // Time in uSec between scrolls.
+extern int auto_scroll_dir; // 0=not moving, 1=down, -1=up
+extern int auto_scroll_cursor_only; // if only moving the cursor
 
 // Cursor position in document:
 extern int cursor_x; // where we are in the document
@@ -228,8 +230,7 @@ void menu_find_char_prev();
 void menu_elevator_down();
 void menu_elevator_up();
 // Automatically scroll the screen.
-void menu_scroll_down_auto();
-void menu_scroll_up_auto();
+void menu_auto_scroll();
 
 //
 // Escape code processing:
@@ -274,10 +275,14 @@ enum COMMANDS_ENUM {
     SCROLL_LEFT,
     SCROLL_RIGHT,
     SCROLL_CENTER,
-    SCROLL_UP_AUTO_SLOW,
-    SCROLL_DOWN_AUTO_SLOW,
-    SCROLL_UP_AUTO_FAST,
-    SCROLL_DOWN_AUTO_FAST,
+    SCROLL_DOWN_AUTO,
+    SCROLL_UP_AUTO,
+    SCROLL_LEFT_AUTO,
+    SCROLL_RIGHT_AUTO,
+    SCROLL_DOWN_AUTO_CAP,
+    SCROLL_UP_AUTO_CAP,
+    SCROLL_LEFT_AUTO_CAP,
+    SCROLL_RIGHT_AUTO_CAP,
     SCROLL_PAGE_UP,
     SCROLL_PAGE_DOWN,
     SEARCH,

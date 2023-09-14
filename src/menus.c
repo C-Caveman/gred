@@ -2,11 +2,49 @@
 // Menus such as the save_file() menu.
 #include "gred.h" 
 
-int auto_scroll_delay = 400000;
+int auto_scroll_delay = 100000;
+int auto_scroll_dir = 0; // 0=not moving, 1=down, -1=up
+int auto_scroll_cursor_only = 0;
 // Stop scrolling as soon as a character is pressed.
 void* auto_scroller_job() {
-    char dummy = getch();
+    #define INC 100000
+    enum        {VERY_SLOW, SLOW,  MED,   FAST,  VERY_FAST};
+    int speeds[] = {INC*10, INC*8, INC*5, INC*3, INC};
+    int speed = VERY_FAST;
+    char c;
+    while (1) {
+        auto_scroll_delay = speeds[speed];
+        c = getch();
+        switch (c) {
+        case 'j':
+            auto_scroll_dir = DOWN;
+            break;
+        case 'k':
+            auto_scroll_dir = UP;
+            break;
+        case 'h':
+            auto_scroll_dir = LEFT;
+            break;
+        case 'l':
+            auto_scroll_dir = RIGHT;
+            break;
+        case 's':
+            auto_scroll_cursor_only = !auto_scroll_cursor_only;
+            break;
+        case 'f':
+            speed += 1;
+            break;
+        case 'd':
+            speed -= 1;
+            break;
+        default:
+            goto STOP_SCROLLING; // Only way to double-break;
+        }
+        speed = bound_value(speed, VERY_SLOW, VERY_FAST);
+    }
+    STOP_SCROLLING:
     auto_scrolling = 0;
+    document[cursor_y].flags |= CHANGED; // redraw this line
     close_menu();
 }
 
@@ -197,47 +235,38 @@ void menu_elevator_up() {
     close_menu();
 }
 // Automatically scroll the screen.
-void menu_scroll_down_auto() {
+void menu_auto_scroll() {
     auto_scrolling = 1;
     cursor_in_menu = 0;
-    if (cur_char == ESCAPE) {
-        close_menu();
-        auto_scrolling = 0;
-        return;
-    }
-    pthread_t scroller_thread;
-    pthread_create(&scroller_thread, NULL, auto_scroller_job, 0); // auto scroll
-    while (auto_scrolling == 1) {
-        alert("Auto scrolling... Press any key to stop.");
-        cursor_y += 1;
-        display_text_top += 1;
-        display_redraw_all = 1;
-        draw_screen();
-        fflush(stdout);
-        usleep(auto_scroll_delay);
-    }
-    pthread_join(scroller_thread, NULL); // Stop the thread.
-}
-void menu_scroll_up_auto() {
-    auto_scrolling = 1;
-    cursor_in_menu = 0;
-    if (cur_char == ESCAPE) {
-        close_menu();
-        auto_scrolling = 0;
-        return;
-    }
     pthread_t scroller_thread;
     pthread_create(&scroller_thread, NULL, auto_scroller_job, 0); // Listen for the next character.
     while (auto_scrolling == 1) {
-        alert("Auto scrolling... Press any key to stop.");
-        cursor_y -= 1;
-        display_text_top -= 1;
+        alert("Auto scrolling. <s> <d> <f>");
+        switch (auto_scroll_dir) {
+        case UP:
+            cursor_y -= 1;
+            if (!auto_scroll_cursor_only) display_text_top -= 1;
+            break;
+        case DOWN:
+            cursor_y += 1;
+            if (!auto_scroll_cursor_only) display_text_top += 1;
+            break;
+        case LEFT:
+            cursor_x -= 1;
+            if (!auto_scroll_cursor_only) display_text_x_start -= 1;
+            break;
+        case RIGHT:
+            cursor_x += 1;
+            if (!auto_scroll_cursor_only) display_text_x_start += 1;
+            break;
+        }
         display_redraw_all = 1;
         draw_screen();
         fflush(stdout);
         usleep(auto_scroll_delay);
     }
     pthread_join(scroller_thread, NULL); // Stop the thread.
+    close_menu();
 }
 
 

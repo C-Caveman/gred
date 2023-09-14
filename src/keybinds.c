@@ -45,14 +45,18 @@ struct binding bindings[] = {
     {"H", SCROLL_LEFT},
     {"L", SCROLL_RIGHT},
     {"\'", SCROLL_CENTER}, // center the screen
-    {";j", SCROLL_DOWN_AUTO_FAST}, // scroll automatically
-    {";k", SCROLL_UP_AUTO_FAST}, // scroll automatically
-    {";J", SCROLL_DOWN_AUTO_SLOW}, // scroll automatically
-    {";K", SCROLL_UP_AUTO_SLOW}, // scroll automatically
+    {";j", SCROLL_DOWN_AUTO}, // scroll automatically (cursor only)
+    {";k", SCROLL_UP_AUTO}, // scroll automatically
+    {";l", SCROLL_RIGHT_AUTO}, // scroll automatically
+    {";h", SCROLL_LEFT_AUTO}, // scroll automatically
+    {";J", SCROLL_DOWN_AUTO_CAP}, // scroll automatically (move screen and cursor)
+    {";K", SCROLL_UP_AUTO_CAP}, // scroll automatically
+    {";L", SCROLL_RIGHT_AUTO_CAP}, // scroll automatically
+    {";H", SCROLL_LEFT_AUTO_CAP}, // scroll automatically
     {"0", GOTO_LINE_START}, // goto start of line
     {";;", GOTO_LINE_START}, // goto start of line
     {"$", GOTO_LINE_END}, // goto end of line
-    {";l", GOTO_LINE_END}, // goto end of line
+    {";e", GOTO_LINE_END}, // goto end of line
     {"g", GOTO_DOCUMENT_TOP}, // goto top of document
     {"G", GOTO_DOCUMENT_BOTTOM}, // goto bottom of document
     

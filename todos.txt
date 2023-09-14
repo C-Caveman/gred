@@ -2,8 +2,6 @@ Utf-8 multi-byte character support.
 
 Delete word binding.
 
-Copy/Paste
-
 Macros.
 
 Clean up mode switching system.

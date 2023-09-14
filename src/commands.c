@@ -68,21 +68,45 @@ void run_command(int command_id) {
         cursor_y += 1;
         display_text_top += 1;
         break;
-    case SCROLL_UP_AUTO_SLOW:
-        auto_scroll_delay = 400000; // uSec between scrolls
-        open_menu(menu_scroll_up_auto);
+    case SCROLL_UP_AUTO:
+        auto_scroll_dir = UP;
+        auto_scroll_cursor_only = 1;
+        open_menu(menu_auto_scroll);
         break;
-    case SCROLL_DOWN_AUTO_SLOW:
-        auto_scroll_delay = 400000; // uSec between scrolls
-        open_menu(menu_scroll_down_auto);
+    case SCROLL_DOWN_AUTO:
+        auto_scroll_dir = DOWN;
+        auto_scroll_cursor_only = 1;
+        open_menu(menu_auto_scroll);
         break;
-    case SCROLL_UP_AUTO_FAST:
-        auto_scroll_delay = 100000; // uSec between scrolls
-        open_menu(menu_scroll_up_auto);
+    case SCROLL_LEFT_AUTO:
+        auto_scroll_dir = LEFT;
+        auto_scroll_cursor_only = 1;
+        open_menu(menu_auto_scroll);
         break;
-    case SCROLL_DOWN_AUTO_FAST:
-        auto_scroll_delay = 100000; // uSec between scrolls
-        open_menu(menu_scroll_down_auto);
+    case SCROLL_RIGHT_AUTO:
+        auto_scroll_dir = RIGHT;
+        auto_scroll_cursor_only = 1;
+        open_menu(menu_auto_scroll);
+        break;
+    case SCROLL_UP_AUTO_CAP:
+        auto_scroll_dir = UP;
+        auto_scroll_cursor_only = 0;
+        open_menu(menu_auto_scroll);
+        break;
+    case SCROLL_DOWN_AUTO_CAP:
+        auto_scroll_dir = DOWN;
+        auto_scroll_cursor_only = 0;
+        open_menu(menu_auto_scroll);
+        break;
+    case SCROLL_LEFT_AUTO_CAP:
+        auto_scroll_dir = LEFT;
+        auto_scroll_cursor_only = 0;
+        open_menu(menu_auto_scroll);
+        break;
+    case SCROLL_RIGHT_AUTO_CAP:
+        auto_scroll_dir = RIGHT;
+        auto_scroll_cursor_only = 0;
+        open_menu(menu_auto_scroll);
         break;
     case SCROLL_LEFT:
         if (display_text_x_start > 0) {
