@@ -164,6 +164,7 @@ int main(int argc, char* argv[]) {
     cursor_x = 0;
     switch_mode(COMMAND_MODE);
     remember_mode(COMMAND_MODE);
+    system("clear");
     display_redraw_all = 1; // Redraw the screen.
     menu = 0;
     while (!quit) {

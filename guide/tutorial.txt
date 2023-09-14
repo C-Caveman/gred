@@ -90,16 +90,16 @@ Commands:
 
     <;;> start of line
 
-    <;l> end of line
+    <;e> end of line
 
     <g>  go to first line
     <G>  go to last line
 
-    <;j> move screen down automatically
-    <;J>     (slow mode)
+    <;j> scroll down automatically (cursor-only)
+    <;k> scroll up   automatically (cursor-only)
 
-    <;k> move screen up automatically
-    <;K>     (slow mode)
+    <;J> scroll down automatically (cursor-and-screen)
+    <;K> scroll up   automatically (cursor-and-screen)
 
 
 -----------------------------------------------
