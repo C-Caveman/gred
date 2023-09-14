@@ -63,7 +63,7 @@ extern int previous_mode; // last mode used (used to revert the mode after an es
 extern int in_chain; // Whether recording a series of edits or not. Used by undo_redo.c
 extern int in_macro; // Whether recording a macro or not. Used by undo_redo.c
 extern struct line macro_buffer; // Characters recorded for a macro.
-extern int auto_scrolling; // Whether scrolling automatically or not.
+extern volatile int auto_scrolling; // Whether scrolling automatically or not.
 extern int auto_scroll_delay; // Time in uSec between scrolls.
 
 // Cursor position in document:

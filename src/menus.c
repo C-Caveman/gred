@@ -15,7 +15,7 @@ void* auto_scroller_job() {
 char alert_buffer[ALERT_SIZE]; // String written to by the alert() function.
 char prompt_buffer[PROMPT_SIZE];
 
-int auto_scrolling = 0;
+volatile int auto_scrolling = 0;
 
 void (*menu)() = 0; // Pointer to the current menu function.
 int cursor_in_menu = 0;
