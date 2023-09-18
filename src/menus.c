@@ -7,10 +7,11 @@ int auto_scroll_dir = 0; // 0=not moving, 1=down, -1=up
 int auto_scroll_cursor_only = 0;
 // Stop scrolling as soon as a character is pressed.
 void* auto_scroller_job() {
-    #define INC 100000
-    enum        {VERY_SLOW, SLOW,  MED,   FAST,  VERY_FAST};
-    int speeds[] = {INC*10, INC*8, INC*5, INC*3, INC};
-    int speed = VERY_FAST;
+    // Increments of time to wait for. (in microseconds)
+    #define INC 1000
+    enum           {VERY_SLOW, SLOW,  MED,   FAST,  VERY_FAST};
+    int speeds[] = {700,       200,   100,   30,    10       }; // Number of INCs to wait for.
+    int speed = MED;
     char c;
     while (1) {
         auto_scroll_delay = speeds[speed];
@@ -38,7 +39,7 @@ void* auto_scroller_job() {
             speed -= 1;
             break;
         default:
-            goto STOP_SCROLLING; // Only way to double-break;
+            goto STOP_SCROLLING; // Only way to double-break.
         }
         speed = bound_value(speed, VERY_SLOW, VERY_FAST);
     }
@@ -242,6 +243,12 @@ void menu_auto_scroll() {
     pthread_create(&scroller_thread, NULL, auto_scroller_job, 0); // Listen for the next character.
     while (auto_scrolling == 1) {
         alert("Auto scrolling. <s> <d> <f>");
+        // wait
+        for (int i=0; i<=auto_scroll_delay; i++) {
+            if (!auto_scrolling) // early detection of cancelling the auto-scroll
+                return;
+            usleep(INC);
+        }
         switch (auto_scroll_dir) {
         case UP:
             cursor_y -= 1;
@@ -263,7 +270,6 @@ void menu_auto_scroll() {
         display_redraw_all = 1;
         draw_screen();
         fflush(stdout);
-        usleep(auto_scroll_delay);
     }
     pthread_join(scroller_thread, NULL); // Stop the thread.
     close_menu();

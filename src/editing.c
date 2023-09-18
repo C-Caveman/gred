@@ -87,7 +87,7 @@ int line_insert_char(char c, int insert_pos, struct line* l) {
 int line_delete_char(int deleted_pos, struct line* l) { // TODO clean this up a bit.
     if (deleted_pos < 0 || deleted_pos > l->len || l->len < 1) // invalid delete
         return deleted_pos;
-    l->text[l->len] = '\0';// Terminated!
+    l->text[l->len] = '\0';// You have been terminated!
     for (int i=deleted_pos; i < l->len; i++) // Trailing letters move to the left.
         l->text[i] = l->text[i+1];
     l->text[l->len] = '0'; // Terminated!
@@ -176,9 +176,9 @@ void line_copy_range(struct line* a, int a_first, int a_last,
 }
 
 //
-// Big mess!   ::
+// More complex operations.   ::
 //
-void merge_line_upwards(int row) { // TODO clean this up! <----------------------------- TODO
+void merge_line_upwards(int row) {
     if (row <= 0 || (document[row-1].len + document[row].len) > LINE_WIDTH)
         return;
     int last_line_len = document[row-1].len;
