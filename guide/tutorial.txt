@@ -138,7 +138,7 @@ Commands:
     
     Add your binding to the list.
 
-    Compile and install with 'sudo make install' (make sure you are in the directory with the Makefile).
+    Compile and install with 'make install' (make sure you are in the directory with the Makefile).
 
 -------------------------------
 :: If you want to add a command:
@@ -153,7 +153,7 @@ Commands:
 
     Add a key binding for using that command. (the list is in src/keybinds.c)
 
-    Compile and install with 'sudo make install' (make sure you are in the directory with the Makefile).
+    Compile and install with 'make install' (make sure you are in the directory with the Makefile).
 
 
 -----------------------------
@@ -168,4 +168,4 @@ Commands:
 
     Write your menu there. You will find plenty examples of how to make a menu there.
 
-    Compile and install with 'sudo make install' (make sure you are in the directory with the Makefile)
+    Compile and install with 'make install' (make sure you are in the directory with the Makefile)

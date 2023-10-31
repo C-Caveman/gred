@@ -212,7 +212,8 @@ void run_escape_code(int escape_code_index);
 // open a menu using a function pointer (uses "cur_char" and "command" for input)
 void open_menu(void (*cur_menu)());
 void close_menu(); // Closes the current menu.
-void alert(); // Print a temporary message in the menu.
+void alert(char* msg); // Print a temporary message in the menu.
+void alert_value(char* msg, int value); // Print a temporary message with a value in the menu.
 // Exit current menu if escape was double-tapped.
 void double_escape_menu_exit();
 // save_file menu

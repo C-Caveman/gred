@@ -50,6 +50,7 @@ void* auto_scroller_job() {
 }
 
 #define ALERT_SIZE 64 // Max size for menu_alert buffer.
+const int ALERT_LEN = ALERT_SIZE;
 #define PROMPT_SIZE 64 // Max size for menu_prompt buffer.
 char alert_buffer[ALERT_SIZE]; // String written to by the alert() function.
 char prompt_buffer[PROMPT_SIZE];

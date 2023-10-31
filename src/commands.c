@@ -8,6 +8,8 @@ int sel_cursor_y = 0;
 #define COPY_BUFFER_SIZE 4096
 int copy_len = 0;
 char copy_buffer[COPY_BUFFER_SIZE];
+extern char* alert_buffer;
+extern const int ALERT_LEN;
 
 // Tutorial information (used for switching to and from the tutorial).
 int in_tutorial = 0;

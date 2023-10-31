@@ -16,6 +16,7 @@ struct binding bindings[] = {
     {"s", SELECT}, // begin selecting text
     {"c", COPY}, // copy selected text TODO copy current word if no selection
     {"v", PASTE}, // paste from clipboard
+    {"p", PASTE},
     {"d", DELETE}, // delete current char
     //{"d", DELETE_WORD}, // delete current word TODO this
     {"X", DELETE_TRAILING}, // delete from cursor_x to end of line
