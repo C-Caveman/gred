@@ -9,8 +9,8 @@ int auto_scroll_cursor_only = 0;
 void* auto_scroller_job() {
     // Increments of time to wait for. (in microseconds)
     #define INC 1000
-    enum           {VERY_SLOW, SLOW,  MED,   FAST,  VERY_FAST};
-    int speeds[] = {700,       200,   100,   30,    10       }; // Number of INCs to wait for.
+    enum           {SLOWEST, VERY_SLOW, SLOW,  MED,   FAST,  VERY_FAST};
+    int speeds[] = {1500,    700,       200,   100,   30,    10       }; // Number of INCs to wait for.
     int speed = MED;
     char c;
     while (1) {
@@ -41,7 +41,7 @@ void* auto_scroller_job() {
         default:
             goto STOP_SCROLLING; // Only way to double-break.
         }
-        speed = bound_value(speed, VERY_SLOW, VERY_FAST);
+        speed = bound_value(speed, SLOWEST, VERY_FAST);
     }
     STOP_SCROLLING:
     auto_scrolling = 0;
