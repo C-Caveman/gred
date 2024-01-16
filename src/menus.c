@@ -11,7 +11,7 @@ void* auto_scroller_job() {
     #define INC 1000
     enum           {SLOWEST, VERY_SLOW, SLOW,  MED,   FAST,  VERY_FAST};
     int speeds[] = {1500,    700,       200,   100,   30,    10       }; // Number of INCs to wait for.
-    int speed = MED;
+    int speed = SLOW;
     char c;
     while (1) {
         auto_scroll_delay = speeds[speed];
