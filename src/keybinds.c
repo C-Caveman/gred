@@ -36,8 +36,8 @@ struct binding bindings[] = {
     {"f", FIND_CHAR_NEXT}, // Find char horizontally.
     {";f", FIND_CHAR_PREV},
     {"F", FIND_CHAR_PREV},
-    {"e", ELEVATOR_DOWN}, // Find char vertically.
-    {"E", ELEVATOR_UP},
+    //{"e", ELEVATOR_DOWN}, // Find char vertically.
+    //{"E", ELEVATOR_UP},
     {"k", UP}, // cursor movement
     {"j", DOWN},
     {"h", LEFT},
@@ -59,10 +59,10 @@ struct binding bindings[] = {
     {";;k", SCROLL_UP_AUTO_CAP}, // scroll automatically
     {";;l", SCROLL_RIGHT_AUTO_CAP}, // scroll automatically
     {";;h", SCROLL_LEFT_AUTO_CAP}, // scroll automatically
-    //{"0", GOTO_LINE_START}, // goto start of line
-    //{";;", GOTO_LINE_START}, // goto start of line
+    {"b", GOTO_LINE_START}, // goto start of line
+    {";e", GOTO_LINE_START}, // goto start of line
     //{"$", GOTO_LINE_END}, // goto end of line
-    {";e", GOTO_LINE_END}, // goto end of line
+    {"e", GOTO_LINE_END}, // goto end of line
     {"g", GOTO_DOCUMENT_TOP}, // goto top of document
     {"G", GOTO_DOCUMENT_BOTTOM}, // goto bottom of document
     
