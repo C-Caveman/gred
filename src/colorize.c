@@ -37,7 +37,7 @@ int line_colors[LINE_WIDTH]; // details for each char's color
 // Keywords:
 //
 char c_operators[] = 
-    "+-=(){}[]<>?!&|;*/:";
+    "+-=(){}[]<>?!&|;*/:.";
 char c_type_names[][MAX_KEYWORD_LEN] = {
     "int",
     "char",
