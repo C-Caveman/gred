@@ -85,12 +85,8 @@ o--------------------------------------------------------o
 Commands:
     </>  search    (find a word in the document)
 
-    <e>  elevator down    (go down until reaching a letter)
-    <E>  elevator up
-
-    <;;> start of line
-
-    <;e> end of line
+    <e>  End of the line.
+    <E>  Start of the line.
 
     <g>  go to first line
     <G>  go to last line
@@ -98,8 +94,8 @@ Commands:
     <;j> scroll down automatically (cursor-only)
     <;k> scroll up   automatically (cursor-only)
 
-    <;J> scroll down automatically (cursor-and-screen)
-    <;K> scroll up   automatically (cursor-and-screen)
+    <;J> scroll down automatically
+    <;K> scroll up   automatically
 
 
 -----------------------------------------------
